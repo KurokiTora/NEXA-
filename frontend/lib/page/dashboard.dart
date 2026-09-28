@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import '../widgets/subject_data.dart';
@@ -15,7 +16,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.Background,
+      backgroundColor: AppColor.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -29,8 +30,12 @@ class DashboardPage extends StatelessWidget {
                   Image.asset('asset/image/Nexa_Logo.png', width: 120),
                   CircleAvatar(
                     radius: 22,
-                    backgroundColor: AppColor.Average,
-                    child: Icon(Icons.person, size: 28, color: AppColor.Primary),
+                    backgroundColor: AppColor.average,
+                    child: Icon(
+                      Icons.person,
+                      size: 28,
+                      color: AppColor.primary,
+                    ),
                   ),
                 ],
               ),
@@ -42,19 +47,32 @@ class DashboardPage extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 46,
-                      backgroundColor: AppColor.Average,
-                      child: Icon(Icons.person, size: 60, color: AppColor.Primary),
+                      backgroundColor: AppColor.average,
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: AppColor.primary,
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    Text('Nexa User', style: AppTextStyles.heading.copyWith(fontSize: 26)),
+                    Text(
+                      'Nexa User',
+                      style: AppTextStyles.heading.copyWith(fontSize: 26),
+                    ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
-                        color: AppColor.Secondary,
+                        color: AppColor.secondary,
                         borderRadius: BorderRadius.circular(7),
                       ),
-                      child: Text('253100000000', style: AppTextStyles.body.copyWith(fontSize: 14)),
+                      child: Text(
+                        '253100000000',
+                        style: AppTextStyles.body.copyWith(fontSize: 14),
+                      ),
                     ),
                   ],
                 ),
@@ -65,17 +83,45 @@ class DashboardPage extends StatelessWidget {
               // rounded cards in a 2x2 grid, each sized to be easy to read.
               Row(
                 children: [
-                  Expanded(child: _buildAcademicCard(icon: Icons.menu_book_outlined, value: '/24', label1: 'Beban/Lulus', label2: 'SKS Semester')),
+                  Expanded(
+                    child: _buildAcademicCard(
+                      icon: Icons.menu_book_outlined,
+                      value: '/24',
+                      label1: 'Beban/Lulus',
+                      label2: 'SKS Semester',
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  Expanded(child: _buildAcademicCard(icon: Icons.menu_book_outlined, value: '/500', label1: 'Beban/Lulus', label2: 'SKS Kumulatif')),
+                  Expanded(
+                    child: _buildAcademicCard(
+                      icon: Icons.menu_book_outlined,
+                      value: '/500',
+                      label1: 'Beban/Lulus',
+                      label2: 'SKS Kumulatif',
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(child: _buildAcademicCard(icon: Icons.workspace_premium_outlined, value: '/3.89', label1: 'Beban/Lulus', label2: 'IP Semester')),
+                  Expanded(
+                    child: _buildAcademicCard(
+                      icon: Icons.workspace_premium_outlined,
+                      value: '/3.89',
+                      label1: 'Beban/Lulus',
+                      label2: 'IP Semester',
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  Expanded(child: _buildAcademicCard(icon: Icons.workspace_premium_outlined, value: '/3.90', label1: 'Beban/Lulus', label2: 'IP Kumulatif')),
+                  Expanded(
+                    child: _buildAcademicCard(
+                      icon: Icons.workspace_premium_outlined,
+                      value: '/3.90',
+                      label1: 'Beban/Lulus',
+                      label2: 'IP Kumulatif',
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -84,11 +130,17 @@ class DashboardPage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(color: AppColor.Primary, borderRadius: BorderRadius.circular(25)),
+                decoration: BoxDecoration(
+                  color: AppColor.primary,
+                  borderRadius: BorderRadius.circular(25),
+                ),
                 child: Text(
                   'Performance By Subject',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.subheading.copyWith(color: AppColor.TextSecondary, fontSize: 16),
+                  style: AppTextStyles.subheading.copyWith(
+                    color: AppColor.textSecondary,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
@@ -97,9 +149,24 @@ class DashboardPage extends StatelessWidget {
               ...subjects.map(
                 (s) => SubjectActionRow(
                   subject: s,
-                  onAttend: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AttendDetailPage(subject: s))),
-                  onGrade: () => Navigator.push(context, MaterialPageRoute(builder: (context) => GradeDetailPage(subject: s))),
-                  onFeedback: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackDetailPage(subject: s))),
+                  onAttend: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AttendDetailPage(subject: s),
+                    ),
+                  ),
+                  onGrade: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GradeDetailPage(subject: s),
+                    ),
+                  ),
+                  onFeedback: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FeedbackDetailPage(subject: s),
+                    ),
+                  ),
                 ),
               ),
 
@@ -114,19 +181,27 @@ class DashboardPage extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
                         (route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColor.Fail,
-                      foregroundColor: AppColor.TextBody,
+                      backgroundColor: AppColor.fail,
+                      foregroundColor: AppColor.textBody,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     child: Text(
                       'LOGOUT',
-                      style: AppTextStyles.button.copyWith(color: AppColor.TextBody, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColor.textBody,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -148,7 +223,7 @@ class DashboardPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColor.Success.withOpacity(0.35),
+        color: AppColor.success.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -157,14 +232,17 @@ class DashboardPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 20, color: AppColor.TextBody),
+              Icon(icon, size: 20, color: AppColor.textBody),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.subheading.copyWith(fontSize: 16, color: AppColor.TextBody),
+                  style: AppTextStyles.subheading.copyWith(
+                    fontSize: 16,
+                    color: AppColor.textBody,
+                  ),
                 ),
               ),
             ],
@@ -173,12 +251,19 @@ class DashboardPage extends StatelessWidget {
           Text(
             label1,
             textAlign: TextAlign.center,
-            style: AppTextStyles.report.copyWith(fontSize: 11, color: AppColor.TextBody.withOpacity(0.6)),
+            style: AppTextStyles.report.copyWith(
+              fontSize: 11,
+              color: AppColor.textBody.withValues(alpha: 0.6),
+            ),
           ),
           Text(
             label2,
             textAlign: TextAlign.center,
-            style: AppTextStyles.report.copyWith(fontSize: 12, fontWeight: FontWeight.bold, color: AppColor.TextBody),
+            style: AppTextStyles.report.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColor.textBody,
+            ),
           ),
         ],
       ),

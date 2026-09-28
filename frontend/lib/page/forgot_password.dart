@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 
@@ -18,19 +19,29 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool _obscureNew = true;
   bool _obscureRewrite = true;
 
-  Widget _logo() => Image.asset('asset/image/Nexa_Logo.png', width: 140, fit: BoxFit.contain);
+  Widget _logo() =>
+      Image.asset('asset/image/Nexa_Logo.png', width: 140, fit: BoxFit.contain);
 
   Widget _field(String label, {bool obscure = false, VoidCallback? toggle}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.body.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: AppTextStyles.body.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 6),
         TextField(
           obscureText: obscure,
           style: AppTextStyles.body.copyWith(fontSize: 14),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
               borderSide: const BorderSide(color: Colors.black),
@@ -41,13 +52,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
-              borderSide: const BorderSide(color: AppColor.Primary, width: 1.5),
+              borderSide: const BorderSide(color: AppColor.primary, width: 1.5),
             ),
             suffixIcon: toggle == null
                 ? null
                 : IconButton(
                     onPressed: toggle,
-                    icon: Icon(obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 18),
+                    icon: Icon(
+                      obscure
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      size: 18,
+                    ),
                   ),
           ),
         ),
@@ -62,10 +78,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColor.Primary,
+          backgroundColor: AppColor.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: Text(label, style: AppTextStyles.button.copyWith(color: Colors.white, fontSize: 14)),
+        child: Text(
+          label,
+          style: AppTextStyles.button.copyWith(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
       ),
     );
   }
@@ -89,7 +111,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           children: [
             _logo(),
             const SizedBox(height: 30),
-            const Icon(Icons.mark_email_read_outlined, size: 64, color: AppColor.Primary),
+            const Icon(
+              Icons.mark_email_read_outlined,
+              size: 64,
+              color: AppColor.primary,
+            ),
             const SizedBox(height: 16),
             Text(
               'Check your inbox and tap the verification link we sent you.',
@@ -97,7 +123,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               style: AppTextStyles.body.copyWith(fontSize: 13),
             ),
             const SizedBox(height: 20),
-            _button('I\'ve Verified, Continue', () => setState(() => _step = 2)),
+            _button(
+              'I\'ve Verified, Continue',
+              () => setState(() => _step = 2),
+            ),
           ],
         );
       case 2:
@@ -107,9 +136,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           children: [
             _logo(),
             const SizedBox(height: 30),
-            _field('New Password', obscure: _obscureNew, toggle: () => setState(() => _obscureNew = !_obscureNew)),
+            _field(
+              'New Password',
+              obscure: _obscureNew,
+              toggle: () => setState(() => _obscureNew = !_obscureNew),
+            ),
             const SizedBox(height: 14),
-            _field('Rewrite Password', obscure: _obscureRewrite, toggle: () => setState(() => _obscureRewrite = !_obscureRewrite)),
+            _field(
+              'Rewrite Password',
+              obscure: _obscureRewrite,
+              toggle: () => setState(() => _obscureRewrite = !_obscureRewrite),
+            ),
             const SizedBox(height: 20),
             _button('Back To Login', () => Navigator.pop(context)),
           ],
@@ -120,7 +157,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.Background,
+      backgroundColor: AppColor.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -136,7 +173,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       setState(() => _step -= 1);
                     }
                   },
-                  icon: const Icon(Icons.arrow_back, color: AppColor.Primary),
+                  icon: const Icon(Icons.arrow_back, color: AppColor.primary),
                 ),
               ),
               Expanded(

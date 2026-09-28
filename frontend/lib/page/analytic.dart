@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import '../widgets/subject_data.dart';
@@ -14,7 +15,7 @@ class AnalyticPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.Background,
+      backgroundColor: AppColor.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
@@ -24,40 +25,85 @@ class AnalyticPage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(color: AppColor.Secondary, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: AppColor.secondary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
                   children: [
-                    Text('Your Performance Is', style: AppTextStyles.body.copyWith(fontSize: 14, color: AppColor.Primary)),
-                    Text('EXCELLENT', style: AppTextStyles.heading.copyWith(fontSize: 26)),
+                    Text(
+                      'Your Performance Is',
+                      style: AppTextStyles.body.copyWith(
+                        fontSize: 14,
+                        color: AppColor.primary,
+                      ),
+                    ),
+                    Text(
+                      'EXCELLENT',
+                      style: AppTextStyles.heading.copyWith(fontSize: 26),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: _metricBox('Percentage Attend', '99', AppColor.Success)),
+                  Expanded(
+                    child: _metricBox(
+                      'Percentage Attend',
+                      '99',
+                      AppColor.success,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _metricBox('Average Grade', '98', AppColor.SubjectPurple)),
+                  Expanded(
+                    child: _metricBox(
+                      'Average Grade',
+                      '98',
+                      AppColor.subjectPurple,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(color: AppColor.Primary, borderRadius: BorderRadius.circular(25)),
+                decoration: BoxDecoration(
+                  color: AppColor.primary,
+                  borderRadius: BorderRadius.circular(25),
+                ),
                 child: Text(
                   'Performance By Subject',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.subheading.copyWith(color: Colors.white, fontSize: 16),
+                  style: AppTextStyles.subheading.copyWith(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               ...subjects.map(
                 (s) => SubjectActionRow(
                   subject: s,
-                  onAttend: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AttendDetailPage(subject: s))),
-                  onGrade: () => Navigator.push(context, MaterialPageRoute(builder: (context) => GradeDetailPage(subject: s))),
-                  onFeedback: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackDetailPage(subject: s))),
+                  onAttend: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AttendDetailPage(subject: s),
+                    ),
+                  ),
+                  onGrade: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GradeDetailPage(subject: s),
+                    ),
+                  ),
+                  onFeedback: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FeedbackDetailPage(subject: s),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -71,7 +117,10 @@ class AnalyticPage extends StatelessWidget {
   Widget _metricBox(String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         children: [
           Text(label, style: AppTextStyles.body.copyWith(fontSize: 12)),

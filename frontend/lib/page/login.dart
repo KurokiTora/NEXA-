@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                color: AppColor.Background,
+                color: AppColor.background,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
                             borderSide: const BorderSide(
-                              color: AppColor.Primary,
+                              color: AppColor.primary,
                               width: 1.5,
                             ),
                           ),
@@ -139,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
                             borderSide: const BorderSide(
-                              color: AppColor.Primary,
+                              color: AppColor.primary,
                               width: 1.5,
                             ),
                           ),
@@ -176,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                       _rememberMe = value ?? false;
                                     });
                                   },
-                                  activeColor: AppColor.Primary,
+                                  activeColor: AppColor.primary,
                                   side: const BorderSide(
                                     color: Colors.black,
                                     width: 1,
@@ -228,8 +228,8 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColor.Primary,
-                            foregroundColor: AppColor.TextSecondary,
+                            backgroundColor: AppColor.primary,
+                            foregroundColor: AppColor.textSecondary,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
@@ -239,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                             'LOGIN',
                             style: AppTextStyles.button.copyWith(
                               fontSize: 13,
-                              color: AppColor.TextSecondary,
+                              color: AppColor.textSecondary,
                             ),
                           ),
                         ),

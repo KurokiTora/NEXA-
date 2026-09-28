@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'subject_data.dart';
@@ -26,7 +27,7 @@ class SubjectActionRow extends StatelessWidget {
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColor.Border, width: 1.5),
+        border: Border.all(color: AppColor.border, width: 1.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -49,7 +50,7 @@ class SubjectActionRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.subheading.copyWith(
-                    color: AppColor.Primary,
+                    color: AppColor.primary,
                     fontSize: 14,
                   ),
                 ),
@@ -58,7 +59,7 @@ class SubjectActionRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.body.copyWith(
-                    color: AppColor.Primary,
+                    color: AppColor.primary,
                     fontSize: 11,
                   ),
                 ),
@@ -80,7 +81,7 @@ class SubjectActionRow extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Icon(icon, color: AppColor.Primary, size: 22),
+        child: Icon(icon, color: AppColor.primary, size: 22),
       ),
     );
   }

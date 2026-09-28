@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'dashboard.dart';
@@ -57,7 +58,7 @@ class AppBottomNav extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
       height: 90,
       decoration: BoxDecoration(
-        color: AppColor.Primary,
+        color: AppColor.primary,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Row(
@@ -77,26 +78,26 @@ class AppBottomNav extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: const BoxDecoration(
-                        color: AppColor.Background,
+                        color: AppColor.background,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         items[i].icon,
                         size: 32,
-                        color: AppColor.TextBody,
+                        color: AppColor.textBody,
                       ),
                     )
                   else
                     Icon(
                       items[i].icon,
                       size: 32,
-                      color: AppColor.TextSecondary,
+                      color: AppColor.textSecondary,
                     ),
                   if (active)
                     Text(
                       items[i].label,
                       style: AppTextStyles.button.copyWith(
-                        color: AppColor.TextSecondary,
+                        color: AppColor.textSecondary,
                         fontSize: 11,
                       ),
                     ),
