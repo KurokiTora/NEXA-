@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/page/dashboard.dart';
+
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import 'dashboard.dart';
 import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,10 +23,7 @@ class _LoginPageState extends State<LoginPage> {
         fit: StackFit.expand,
         children: [
           // BACKGROUND HALAMAN
-          Image.asset(
-            'asset/image/bg_login.png',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('asset/image/bg_login.png', fit: BoxFit.cover),
 
           // CONTENT LOGIN
           SafeArea(
@@ -66,9 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // USERNAME FIELD
                       TextField(
-                        style: AppTextStyles.body.copyWith(
-                          fontSize: 12,
-                        ),
+                        style: AppTextStyles.body.copyWith(fontSize: 12),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -121,9 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                       // PASSWORD FIELD
                       TextField(
                         obscureText: _obscurePassword,
-                        style: AppTextStyles.body.copyWith(
-                          fontSize: 12,
-                        ),
+                        style: AppTextStyles.body.copyWith(fontSize: 12),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -193,9 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                               const SizedBox(width: 3),
                               Text(
                                 'Remember me',
-                                style: AppTextStyles.body.copyWith(
-                                  fontSize: 6,
-                                ),
+                                style: AppTextStyles.body.copyWith(fontSize: 6),
                               ),
                             ],
                           ),
@@ -230,11 +221,11 @@ class _LoginPageState extends State<LoginPage> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const DashboardPage(),
-                                    ),
-                                  );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DashboardPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColor.Primary,
