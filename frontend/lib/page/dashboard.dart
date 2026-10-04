@@ -8,6 +8,7 @@ import 'grade_detail.dart';
 import 'attend_detail.dart';
 import 'feedback_detail.dart';
 import 'login.dart';
+import '../widgets/states/status_popup.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -112,10 +113,15 @@ class DashboardPage extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushAndRemoveUntil(
+                      showLogoutConfirmDialog(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                        (route) => false,
+                        onLogout: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginPage()),
+                            (route) => false,
+                          );
+                        },
                       );
                     },
                     style: ElevatedButton.styleFrom(

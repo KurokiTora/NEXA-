@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
+import '../widgets/states/error_banner.dart';
 
 /// Handles the 3-step flow shown in the design:
 /// step 0: enter email -> send verify
@@ -17,16 +18,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   int _step = 0;
   bool _obscureNew = true;
   bool _obscureRewrite = true;
+  bool _showEmailError = false;
+  final _emailController = TextEditingController();
 
   Widget _logo() => Image.asset('asset/image/Nexa_Logo.png', width: 140, fit: BoxFit.contain);
 
-  Widget _field(String label, {bool obscure = false, VoidCallback? toggle}) {
+  Widget _field(String label, {bool obscure = false, VoidCallback? toggle, TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: AppTextStyles.body.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           obscureText: obscure,
           style: AppTextStyles.body.copyWith(fontSize: 14),
           decoration: InputDecoration(
@@ -78,9 +82,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           children: [
             _logo(),
             const SizedBox(height: 30),
-            _field('Email'),
+            if (_showEmailError)
+              ErrorBanner(
+                title: 'Email Not Found',
+                message: "We couldn't find an account associated with that email address.",
+              ),
+            _field('Email', controller: _emailController),
             const SizedBox(height: 20),
-            _button('Send Email Verify', () => setState(() => _step = 1)),
+            _button('Send Email Verify', () {
+              if (_emailController.text.trim().isEmpty) {
+                setState(() => _showEmailError = true);
+                return;
+              }
+              setState(() {
+                _showEmailError = false;
+                _step = 1;
+              });
+            }),
           ],
         );
       case 1:
@@ -118,41 +136,56 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.Background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () {
-                    if (_step == 0) {
-                      Navigator.pop(context);
-                    } else {
-                      setState(() => _step -= 1);
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_back, color: AppColor.Primary),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: _stepContent(),
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      fit: StackFit.expand,
+      children: [
+        // BACKGROUND
+        Image.asset(
+          'asset/image/bg_login.png',
+          fit: BoxFit.cover,
+        ),
+
+        // CONTENT
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: () {
+                      if (_step == 0) {
+                        Navigator.pop(context);
+                      } else {
+                        setState(() => _step -= 1);
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppColor.Primary,
                     ),
                   ),
                 ),
-              ),
-            ],
+
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _stepContent(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 }

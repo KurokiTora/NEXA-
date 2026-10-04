@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/page/dashboard.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'dashboard.dart';
 import 'forgot_password.dart';
+import '../widgets/states/error_banner.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +15,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _showLoginError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +37,12 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                color: AppColor.Background,
+                color: Colors.transparent,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      const SizedBox(height: 195),
+                      const SizedBox(height: 160),
 
                       // LOGO
                       Image.asset(
@@ -50,29 +53,36 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 30),
 
+                      if (_showLoginError)
+                        ErrorBanner(
+                          title: 'Login Failed',
+                          message: 'Invalid Student ID or Password. Please try again.',
+                        ),
+
                       // USERNAME
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           'NIM / Username',
                           style: AppTextStyles.body.copyWith(
-                            fontSize: 9,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 6),
 
                       // USERNAME FIELD
                       TextField(
+                        controller: _usernameController,
                         style: AppTextStyles.body.copyWith(
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
+                            horizontal: 12,
+                            vertical: 10,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
@@ -97,12 +107,12 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           suffixIcon: const Icon(
                             Icons.person_outline,
-                            size: 15,
+                            size: 18,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       // PASSWORD
                       Align(
@@ -110,24 +120,25 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(
                           'Password',
                           style: AppTextStyles.body.copyWith(
-                            fontSize: 9,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 6),
 
                       // PASSWORD FIELD
                       TextField(
+                        controller: _passwordController,
                         obscureText: _obscurePassword,
                         style: AppTextStyles.body.copyWith(
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
+                            horizontal: 12,
+                            vertical: 10,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
@@ -152,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           suffixIcon: IconButton(
                             padding: EdgeInsets.zero,
-                            iconSize: 15,
+                            iconSize: 18,
                             onPressed: () {
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
@@ -167,6 +178,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
+                      const SizedBox(height: 14),
+
                       // REMEMBER + FORGOT PASSWORD
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,8 +187,8 @@ class _LoginPageState extends State<LoginPage> {
                           Row(
                             children: [
                               SizedBox(
-                                width: 16,
-                                height: 16,
+                                width: 18,
+                                height: 18,
                                 child: Checkbox(
                                   value: _rememberMe,
                                   onChanged: (value) {
@@ -183,6 +196,8 @@ class _LoginPageState extends State<LoginPage> {
                                       _rememberMe = value ?? false;
                                     });
                                   },
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
                                   activeColor: AppColor.Primary,
                                   side: const BorderSide(
                                     color: Colors.black,
@@ -190,11 +205,11 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: 6),
                               Text(
                                 'Remember me',
                                 style: AppTextStyles.body.copyWith(
-                                  fontSize: 6,
+                                  fontSize: 11,
                                 ),
                               ),
                             ],
@@ -213,7 +228,8 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'Forgot Password',
                               style: AppTextStyles.body.copyWith(
-                                fontSize: 6,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                                 decoration: TextDecoration.underline,
                               ),
                             ),
@@ -221,20 +237,27 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
 
-                      const SizedBox(height: 7),
+                      const SizedBox(height: 22),
 
                       // LOGIN BUTTON
                       SizedBox(
                         width: double.infinity,
-                        height: 27,
+                        height: 46,
                         child: ElevatedButton(
                           onPressed: () {
+                            final isValid = _usernameController.text.isNotEmpty &&
+                                _passwordController.text.isNotEmpty;
+                            if (!isValid) {
+                              setState(() => _showLoginError = true);
+                              return;
+                            }
+                            setState(() => _showLoginError = false);
                             Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const DashboardPage(),
-                                    ),
-                                  );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DashboardPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColor.Primary,
@@ -247,7 +270,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'LOGIN',
                             style: AppTextStyles.button.copyWith(
-                              fontSize: 13,
+                              fontSize: 15,
                               color: AppColor.TextSecondary,
                             ),
                           ),

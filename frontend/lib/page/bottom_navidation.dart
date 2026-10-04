@@ -54,59 +54,61 @@ class AppBottomNav extends StatelessWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      height: 90,
-      decoration: BoxDecoration(
-        color: AppColor.Primary,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(items.length, (i) {
-          final active = i == currentIndex;
-          return GestureDetector(
-            onTap: () => _go(context, i),
-            behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              width: 65,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (active)
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: const BoxDecoration(
-                        color: AppColor.Background,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        items[i].icon,
-                        size: 32,
-                        color: AppColor.TextBody,
-                      ),
-                    )
-                  else
-                    Icon(
-                      items[i].icon,
-                      size: 32,
-                      color: AppColor.TextSecondary,
-                    ),
-                  if (active)
-                    Text(
-                      items[i].label,
-                      style: AppTextStyles.button.copyWith(
-                        color: AppColor.TextSecondary,
-                        fontSize: 11,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
+  margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+  height: 78,
+  decoration: BoxDecoration(
+    color: AppColor.Primary,
+    borderRadius: BorderRadius.circular(24),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    children: List.generate(items.length, (i) {
+      final active = i == currentIndex;
+
+      return GestureDetector(
+        onTap: () => _go(context, i),
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 58,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (active)
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: AppColor.Background,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    items[i].icon,
+                    size: 27,
+                    color: AppColor.TextBody,
+                  ),
+                )
+              else
+                Icon(
+                  items[i].icon,
+                  size: 28,
+                  color: AppColor.TextSecondary,
+                ),
+
+              if (active)
+                Text(
+                  items[i].label,
+                  style: AppTextStyles.button.copyWith(
+                    color: AppColor.TextSecondary,
+                    fontSize: 9,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }),
+  ),
+);
   }
 }
 
