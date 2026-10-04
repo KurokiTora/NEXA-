@@ -54,10 +54,10 @@ class AttendPage extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  _countBox(Icons.check_circle, '112', 'Hadir', AppColor.Success),
-                  _countBox(Icons.assignment_outlined, '8', 'Izin', AppColor.SubjectBlue),
-                  _countBox(Icons.event_busy, '4', 'Sakit', AppColor.Average),
-                  _countBox(Icons.cancel, '2', 'Alfa', AppColor.Fail),
+                  _countBox(Icons.check_circle, '112', 'Attend', AppColor.Success),
+                  _countBox(Icons.assignment_outlined, '8', 'Permint', AppColor.SubjectBlue),
+                  _countBox(Icons.event_busy, '4', 'Sick', AppColor.Average),
+                  _countBox(Icons.cancel, '2', 'Alpha', AppColor.Fail),
                 ],
               ),
               const SizedBox(height: 16),
