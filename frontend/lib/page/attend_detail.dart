@@ -1,46 +1,31 @@
 import 'package:flutter/material.dart';
-
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import '../widgets/subject_data.dart';
+import '../widgets/states/empty_state.dart';
 
 class AttendDetailPage extends StatelessWidget {
   final Subject subject;
-  const AttendDetailPage({super.key, required this.subject});
+  // Pass an empty list (e.g. no attendance recorded yet) to show the
+  // "no attendance available" empty state instead of the history list.
+  final List<Map<String, Object>>? history;
+
+  const AttendDetailPage({super.key, required this.subject, this.history});
 
   @override
   Widget build(BuildContext context) {
-    final history = [
-      {
-        'label': 'Class Meeting 1',
-        'status': 'Attend',
-        'color': AppColor.success,
-      },
-      {
-        'label': 'Class Meeting 2',
-        'status': 'Attend',
-        'color': AppColor.success,
-      },
-      {
-        'label': 'Class Meeting 3',
-        'status': 'Permit',
-        'color': AppColor.average,
-      },
-      {'label': 'Class Meeting 4', 'status': 'Alpha', 'color': AppColor.fail},
-      {
-        'label': 'Class Meeting 5',
-        'status': 'Attend',
-        'color': AppColor.success,
-      },
-      {
-        'label': 'Class Meeting 6',
-        'status': 'Attend',
-        'color': AppColor.success,
-      },
-    ];
+    final data = history ??
+        [
+          {'label': 'Class Meeting 1', 'status': 'Attend', 'color': AppColor.Success},
+          {'label': 'Class Meeting 2', 'status': 'Attend', 'color': AppColor.Success},
+          {'label': 'Class Meeting 3', 'status': 'Permit', 'color': AppColor.Average},
+          {'label': 'Class Meeting 4', 'status': 'Alpha', 'color': AppColor.Fail},
+          {'label': 'Class Meeting 5', 'status': 'Attend', 'color': AppColor.Success},
+          {'label': 'Class Meeting 6', 'status': 'Attend', 'color': AppColor.Success},
+        ];
 
     return Scaffold(
-      backgroundColor: AppColor.background,
+      backgroundColor: AppColor.Background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
@@ -51,83 +36,57 @@ class AttendDetailPage extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: AppColor.primary,
-                    ),
+                    child: const Icon(Icons.arrow_back, color: AppColor.Primary),
                   ),
                   const SizedBox(width: 16),
-                  Text(
-                    subject.name,
-                    style: AppTextStyles.subheading.copyWith(fontSize: 18),
-                  ),
+                  Text(subject.name, style: AppTextStyles.subheading.copyWith(fontSize: 18)),
                 ],
               ),
               const SizedBox(height: 16),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  color: AppColor.secondary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                decoration: BoxDecoration(color: AppColor.Secondary, borderRadius: BorderRadius.circular(20)),
                 child: Column(
                   children: [
-                    Text(
-                      'Attendance',
-                      style: AppTextStyles.body.copyWith(fontSize: 14),
-                    ),
-                    Text(
-                      '99%',
-                      style: AppTextStyles.heading.copyWith(fontSize: 40),
-                    ),
+                    Text('Attendance', style: AppTextStyles.body.copyWith(fontSize: 14)),
+                    Text(data.isEmpty ? '0%' : '99%', style: AppTextStyles.heading.copyWith(fontSize: 40)),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  _statBox('Attend', '40', AppColor.subjectGreen),
-                  _statBox('Permit', '1', AppColor.average),
-                  _statBox('Sick', '0', AppColor.subjectPurple),
-                  _statBox('Alpha', '1', AppColor.fail),
+                  _statBox('Attend', data.isEmpty ? '0' : '40', AppColor.SubjectGreen),
+                  _statBox('Permit', data.isEmpty ? '0' : '1', AppColor.Average),
+                  _statBox('Sick', '0', AppColor.SubjectPurple),
+                  _statBox('Alpha', data.isEmpty ? '0' : '1', AppColor.Fail),
                 ],
               ),
               const SizedBox(height: 20),
-              Text(
-                'History Attendance',
-                style: AppTextStyles.subheading.copyWith(fontSize: 16),
-              ),
+              Text('History Attendance', style: AppTextStyles.subheading.copyWith(fontSize: 16)),
               const SizedBox(height: 8),
-              ...history.map(
-                (h) => Container(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: (h['color'] as Color).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        h['label'] as String,
-                        style: AppTextStyles.body.copyWith(fontSize: 13),
+              if (data.isEmpty)
+                const EmptyState(
+                  icon: Icons.person_outline,
+                  message: 'There is no attendance available for this course yet.',
+                )
+              else
+                ...data.map((h) => Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: (h['color'] as Color).withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      Text(
-                        h['status'] as String,
-                        style: AppTextStyles.body.copyWith(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(h['label'] as String, style: AppTextStyles.body.copyWith(fontSize: 13)),
+                          Text(h['status'] as String, style: AppTextStyles.body.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    )),
             ],
           ),
         ),
@@ -140,10 +99,7 @@ class AttendDetailPage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 3),
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
             Text(label, style: AppTextStyles.body.copyWith(fontSize: 11)),
