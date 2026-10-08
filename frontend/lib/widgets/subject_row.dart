@@ -32,15 +32,24 @@ class SubjectActionRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: subject.color,
-              borderRadius: BorderRadius.circular(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              subject.image,
+              width: 30,
+              height: 30,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 30,
+                  height: 30,
+                  color: subject.color,
+                );
+              },
             ),
           ),
           const SizedBox(width: 10),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +75,9 @@ class SubjectActionRow extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(width: 6),
+
           _actionIcon(Icons.account_box_outlined, onAttend),
           _actionIcon(Icons.workspace_premium_outlined, onGrade),
           _actionIcon(Icons.chat_outlined, onFeedback),
@@ -81,8 +92,42 @@ class SubjectActionRow extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Icon(icon, color: AppColor.primary, size: 22),
+        child: Icon(
+          icon,
+          color: AppColor.primary,
+          size: 22,
+        ),
       ),
     );
+  }
+}
+
+
+/// Mapping icon mata kuliah
+String getSubjectImage(String name) {
+  switch (name) {
+    case "Pemrograman Mobile":
+      return "asset/image/subject/mobile.png";
+
+    case "Jaringan Komputer":
+      return "asset/image/subject/jaringan.png";
+
+    case "Kecerdasan Buatan":
+      return "asset/image/subject/ai.png";
+
+    case "Basis Data":
+      return "asset/image/subject/database.png";
+
+    case "Sistem Operasi":
+      return "asset/image/subject/sistem.png";
+
+    case "Pemrograman Web":
+      return "asset/image/subject/web.png";
+
+    case "Statistika":
+      return "asset/image/subject/statistik.png";
+
+    default:
+      return "asset/image/subject/default.png";
   }
 }

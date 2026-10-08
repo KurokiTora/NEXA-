@@ -129,14 +129,22 @@ class FeedbackPage extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          width: 26,
-                          height: 26,
-                          decoration: BoxDecoration(
-                            color: s.color,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
+                        ClipRRect(
+  borderRadius: BorderRadius.circular(6),
+  child: Image.asset(
+    s.image,
+    width: 26,
+    height: 26,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Container(
+        width: 26,
+        height: 26,
+        color: s.color,
+      );
+    },
+  ),
+),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
