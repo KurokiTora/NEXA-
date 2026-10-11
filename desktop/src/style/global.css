@@ -1,0 +1,93 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  font-family: "Inter", Arial, sans-serif;
+  color: #24334d;
+  background: #f3f5f9;
+
+  --nexa-navy: #09275b;
+  --nexa-navy-light: #153c78;
+  --nexa-background: #f3f5f9;
+  --nexa-white: #ffffff;
+  --nexa-border: #e5e9f0;
+  --nexa-text: #24334d;
+  --nexa-muted: #8791a4;
+  --nexa-green: #36bd85;
+  --nexa-red: #cf4141;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.page-container {
+  display: grid;
+  gap: 22px;
+  padding: 28px 34px;
+}
+
+.panel {
+  border: 1px solid var(--nexa-border);
+  border-radius: 5px;
+  background: var(--nexa-white);
+}
+
+.page-title {
+  margin: 0;
+  color: var(--nexa-navy);
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.page-description {
+  margin: 8px 0 0;
+  color: var(--nexa-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.section-eyebrow {
+  margin: 0 0 8px;
+  color: var(--nexa-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    gap: 14px;
+    padding: 16px 14px;
+  }
+
+  .page-title {
+    font-size: 21px;
+  }
+}
