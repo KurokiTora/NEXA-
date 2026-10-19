@@ -11,6 +11,11 @@ import Assignment from './assignment.js';
 import Submission from './submission.js';
 import SubmissionFile from './submissionfile.js';
 import AssessmentScore from './assessmentscore.js';
+import AttendanceSession from './attendancesession.js';
+import AttendanceRecord from './attendancerecord.js';
+import GradingConfiguration from './gradingconfiguration.js';
+import GradingComponent from './gradingcomponent.js';
+import CourseResult from './courseresult.js';
 
 // A user account may have one student profile.
 User.hasOne(Student, {
@@ -170,6 +175,104 @@ AssessmentScore.belongsTo(Enrollment, {
     as: 'enrollment'
 });
 
+// Class <-> AttendanceSession
+Class.hasMany(AttendanceSession, {
+    foreignKey: 'classId',
+    as: 'attendanceSessions'
+});
+
+AttendanceSession.belongsTo(Class, {
+    foreignKey: 'classId',
+    as: 'class'
+});
+
+// AttendanceSession <-> AttendanceRecord
+AttendanceSession.hasMany(AttendanceRecord, {
+    foreignKey: 'attendanceSessionId',
+    as: 'attendanceRecords'
+});
+
+AttendanceRecord.belongsTo(AttendanceSession, {
+    foreignKey: 'attendanceSessionId',
+    as: 'attendanceSession'
+});
+
+// Enrollment <-> AttendanceRecord
+Enrollment.hasMany(AttendanceRecord, {
+    foreignKey: 'enrollmentId',
+    as: 'attendanceRecords'
+});
+
+AttendanceRecord.belongsTo(Enrollment, {
+    foreignKey: 'enrollmentId',
+    as: 'enrollment'
+});
+
+// Class <-> GradingConfiguration
+Class.hasMany(GradingConfiguration, {
+    foreignKey: 'classId',
+    as: 'gradingConfigurations'
+});
+
+GradingConfiguration.belongsTo(Class, {
+    foreignKey: 'classId',
+    as: 'class'
+});
+
+// Lecturer <-> GradingConfiguration
+Lecturer.hasMany(GradingConfiguration, {
+    foreignKey: 'createdBy',
+    as: 'createdGradingConfigurations'
+});
+
+GradingConfiguration.belongsTo(Lecturer, {
+    foreignKey: 'createdBy',
+    as: 'createdByLecturer'
+});
+
+// GradingConfiguration <-> GradingComponent
+GradingConfiguration.hasMany(GradingComponent, {
+    foreignKey: 'gradingConfigurationId',
+    as: 'components'
+});
+
+GradingComponent.belongsTo(GradingConfiguration, {
+    foreignKey: 'gradingConfigurationId',
+    as: 'gradingConfiguration'
+});
+
+// Assessment <-> GradingComponent
+Assessment.hasMany(GradingComponent, {
+    foreignKey: 'assessmentId',
+    as: 'gradingComponents'
+});
+
+GradingComponent.belongsTo(Assessment, {
+    foreignKey: 'assessmentId',
+    as: 'assessment'
+});
+
+// Enrollment <-> CourseResult
+Enrollment.hasMany(CourseResult, {
+    foreignKey: 'enrollmentId',
+    as: 'courseResults'
+});
+
+CourseResult.belongsTo(Enrollment, {
+    foreignKey: 'enrollmentId',
+    as: 'enrollment'
+});
+
+// GradingConfiguration <-> CourseResult
+GradingConfiguration.hasMany(CourseResult, {
+    foreignKey: 'gradingConfigurationId',
+    as: 'courseResults'
+});
+
+CourseResult.belongsTo(GradingConfiguration, {
+    foreignKey: 'gradingConfigurationId',
+    as: 'gradingConfiguration'
+});
 
 export {
     User,
@@ -183,5 +286,10 @@ export {
     Assignment,
     Submission,
     SubmissionFile,
-    AssessmentScore
+    AssessmentScore,
+    AttendanceSession,
+    AttendanceRecord,
+    GradingConfiguration,
+    GradingComponent,
+    CourseResult
 };
