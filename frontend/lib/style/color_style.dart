@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// Palette constants intentionally use PascalCase (AppColor.Primary, ...).
+// ignore_for_file: constant_identifier_names
+
 class AppColor{
   static const Color Primary = Color(0xFF00245D);
   static const Color Secondary = Color(0xFFCAE5FD);

@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import '../data/models/course.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import 'subject_data.dart';
+import 'course_palette.dart';
 
-/// Compact subject list row shared by Dashboard & Analytic pages.
-/// Fixed-width elements (swatch + 3 icons) are kept small on purpose so the
-/// Expanded name/code column always keeps enough room on narrow screens.
+/// Compact course row with 3 quick actions (attend / grade / feedback),
+/// used on the Dashboard. Fixed-width parts are kept small on purpose so the
+/// Expanded name/code column always keeps room on narrow screens.
 class SubjectActionRow extends StatelessWidget {
-  final Subject subject;
-  final VoidCallback? onAttend;
-  final VoidCallback? onGrade;
-  final VoidCallback? onFeedback;
-
   const SubjectActionRow({
     super.key,
-    required this.subject,
+    required this.course,
     this.onAttend,
     this.onGrade,
     this.onFeedback,
   });
+
+  final Course course;
+  final VoidCallback? onAttend;
+  final VoidCallback? onGrade;
+  final VoidCallback? onFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class SubjectActionRow extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: subject.color,
+              color: courseColor(course.colorIndex),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -45,22 +46,18 @@ class SubjectActionRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subject.name,
+                  course.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.subheading.copyWith(
-                    color: AppColor.Primary,
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyles.subheading
+                      .copyWith(color: AppColor.Primary, fontSize: 14),
                 ),
                 Text(
-                  subject.code,
+                  course.code,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColor.Primary,
-                    fontSize: 11,
-                  ),
+                  style: AppTextStyles.body
+                      .copyWith(color: AppColor.Primary, fontSize: 11),
                 ),
               ],
             ),

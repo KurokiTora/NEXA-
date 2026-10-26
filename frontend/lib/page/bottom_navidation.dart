@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'dashboard.dart';
-import 'analytic.dart';
 import 'grade.dart';
+import 'chatbot.dart';
 import 'feedback.dart';
 import 'attend.dart';
 
 /// Shared bottom navigation bar for the 5 main tabs.
-/// index: 0 = Home, 1 = Analytic, 2 = Grade, 3 = Feedback, 4 = Attend
+/// index: 0 = Home, 1 = Grade, 2 = Chatbot, 3 = Feedback, 4 = Attend
 ///
 /// Visual style: the active tab's icon "pops up" above the bar in a
 /// floating white circle (overlapping the bar's top edge), with its
@@ -27,10 +27,10 @@ class AppBottomNav extends StatelessWidget {
         page = const DashboardPage();
         break;
       case 1:
-        page = const AnalyticPage();
+        page = const GradePage();
         break;
       case 2:
-        page = const GradePage();
+        page = const ChatbotPage();
         break;
       case 3:
         page = const FeedbackPage();
@@ -51,8 +51,8 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       _NavItemData(icon: Icons.home_outlined, label: 'Home'),
-      _NavItemData(icon: Icons.pie_chart_outline, label: 'Analytic'),
       _NavItemData(icon: Icons.workspace_premium_outlined, label: 'Grade'),
+      _NavItemData(icon: Icons.auto_awesome, label: 'Chatbot'),
       _NavItemData(icon: Icons.chat_outlined, label: 'Feedback'),
       _NavItemData(icon: Icons.account_box_outlined, label: 'Attend'),
     ];
@@ -69,7 +69,7 @@ class AppBottomNav extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: AppColor.Primary.withOpacity(0.35),
+              color: AppColor.Primary.withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -103,7 +103,7 @@ class AppBottomNav extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.18),
+                                  color: Colors.black.withValues(alpha: 0.18),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -140,7 +140,7 @@ class AppBottomNav extends StatelessWidget {
                           child: Icon(
                             items[i].icon,
                             size: 26,
-                            color: AppColor.TextSecondary.withOpacity(0.55),
+                            color: AppColor.TextSecondary.withValues(alpha: 0.55),
                           ),
                         ),
                       ),

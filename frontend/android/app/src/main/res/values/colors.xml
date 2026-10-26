@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches AppColor.Background in lib/style/color_style.dart so the
+         native launch window blends into SplashPage without a flash. -->
+    <color name="nexa_background">#FFFFFFFF</color>
+    <color name="ic_launcher_background">#FFFFFFFF</color>
+</resources>

@@ -1,110 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../data/models/course.dart';
+import '../data/models/course_details.dart';
+import '../data/repositories/nexa_repository.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import '../widgets/subject_data.dart';
+import '../widgets/detail_parts.dart';
 import '../widgets/states/empty_state.dart';
 
-class AttendDetailPage extends StatelessWidget {
-  final Subject subject;
-  // Pass an empty list (e.g. no attendance recorded yet) to show the
-  // "no attendance available" empty state instead of the history list.
-  final List<Map<String, Object>>? history;
+class AttendDetailPage extends StatefulWidget {
+  const AttendDetailPage({super.key, required this.courseId});
 
-  const AttendDetailPage({super.key, required this.subject, this.history});
+  final int courseId;
+
+  @override
+  State<AttendDetailPage> createState() => _AttendDetailPageState();
+}
+
+class _AttendDetailPageState extends State<AttendDetailPage> {
+  late final Stream<Course?> _course;
+  late final Stream<List<AttendanceLog>> _history;
+
+  @override
+  void initState() {
+    super.initState();
+    final repo = context.read<NexaRepository>();
+    _course = repo.watchCourse(widget.courseId);
+    _history = repo.watchAttendance(widget.courseId);
+  }
+
+  String _statusText(AttendanceStatus s) => switch (s) {
+        AttendanceStatus.attend => 'Attend',
+        AttendanceStatus.permit => 'Permit',
+        AttendanceStatus.sick => 'Sick',
+        AttendanceStatus.alpha => 'Alpha',
+      };
+
+  Color _statusColor(AttendanceStatus s) => switch (s) {
+        AttendanceStatus.attend => AppColor.Success,
+        AttendanceStatus.permit => AppColor.Average,
+        AttendanceStatus.sick => AppColor.SubjectPurple,
+        AttendanceStatus.alpha => AppColor.Fail,
+      };
 
   @override
   Widget build(BuildContext context) {
-    final data = history ??
-        [
-          {'label': 'Class Meeting 1', 'status': 'Attend', 'color': AppColor.Success},
-          {'label': 'Class Meeting 2', 'status': 'Attend', 'color': AppColor.Success},
-          {'label': 'Class Meeting 3', 'status': 'Permit', 'color': AppColor.Average},
-          {'label': 'Class Meeting 4', 'status': 'Alpha', 'color': AppColor.Fail},
-          {'label': 'Class Meeting 5', 'status': 'Attend', 'color': AppColor.Success},
-          {'label': 'Class Meeting 6', 'status': 'Attend', 'color': AppColor.Success},
-        ];
-
     return Scaffold(
       backgroundColor: AppColor.Background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back, color: AppColor.Primary),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(subject.name, style: AppTextStyles.subheading.copyWith(fontSize: 18)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(color: AppColor.Secondary, borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  children: [
-                    Text('Attendance', style: AppTextStyles.body.copyWith(fontSize: 14)),
-                    Text(data.isEmpty ? '0%' : '99%', style: AppTextStyles.heading.copyWith(fontSize: 40)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _statBox('Attend', data.isEmpty ? '0' : '40', AppColor.SubjectGreen),
-                  _statBox('Permit', data.isEmpty ? '0' : '1', AppColor.Average),
-                  _statBox('Sick', '0', AppColor.SubjectPurple),
-                  _statBox('Alpha', data.isEmpty ? '0' : '1', AppColor.Fail),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text('History Attendance', style: AppTextStyles.subheading.copyWith(fontSize: 16)),
-              const SizedBox(height: 8),
-              if (data.isEmpty)
-                const EmptyState(
-                  icon: Icons.person_outline,
-                  message: 'There is no attendance available for this course yet.',
-                )
-              else
-                ...data.map((h) => Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: (h['color'] as Color).withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(10),
+        child: StreamBuilder<Course?>(
+          stream: _course,
+          builder: (context, courseSnap) {
+            final course = courseSnap.data;
+            return StreamBuilder<List<AttendanceLog>>(
+              stream: _history,
+              builder: (context, listSnap) {
+                final items = listSnap.data ?? const <AttendanceLog>[];
+                final empty = course == null || items.isEmpty;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DetailTopBar(title: course?.name ?? ''),
+                      const SizedBox(height: 16),
+                      BigNumberCard(
+                        label: 'Attendance',
+                        value: empty ? '0%' : '${course.attendPercent}%',
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const SizedBox(height: 16),
+                      Row(
                         children: [
-                          Text(h['label'] as String, style: AppTextStyles.body.copyWith(fontSize: 13)),
-                          Text(h['status'] as String, style: AppTextStyles.body.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+                          StatBox(label: 'Attend', value: empty ? '0' : '${course.attendCount}', color: AppColor.SubjectGreen),
+                          StatBox(label: 'Permit', value: empty ? '0' : '${course.permitCount}', color: AppColor.Average),
+                          StatBox(label: 'Sick', value: empty ? '0' : '${course.sickCount}', color: AppColor.SubjectPurple),
+                          StatBox(label: 'Alpha', value: empty ? '0' : '${course.alphaCount}', color: AppColor.Fail),
                         ],
                       ),
-                    )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _statBox(String label, String value, Color color) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          children: [
-            Text(label, style: AppTextStyles.body.copyWith(fontSize: 11)),
-            Text(value, style: AppTextStyles.subheading.copyWith(fontSize: 18)),
-          ],
+                      const SizedBox(height: 20),
+                      Text(
+                        'History Attendance',
+                        style: AppTextStyles.subheading.copyWith(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      if (items.isEmpty)
+                        const EmptyState(
+                          icon: Icons.person_outline,
+                          message: 'There is no attendance available for this course yet.',
+                        )
+                      else
+                        ...items.map(
+                          (h) => StatusRow(
+                            label: h.title,
+                            status: _statusText(h.status),
+                            color: _statusColor(h.status),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

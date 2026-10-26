@@ -33,7 +33,7 @@ class StatusPopup extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColor.Background,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 12)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 12)],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -54,7 +54,7 @@ class StatusPopup extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(fontSize: 11, color: AppColor.TextBody.withOpacity(0.7)),
+              style: AppTextStyles.body.copyWith(fontSize: 11, color: AppColor.TextBody.withValues(alpha: 0.7)),
             ),
             const SizedBox(height: 14),
             if (secondaryLabel == null)

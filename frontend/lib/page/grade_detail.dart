@@ -1,110 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../data/models/course.dart';
+import '../data/models/course_details.dart';
+import '../data/repositories/nexa_repository.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import '../widgets/subject_data.dart';
+import '../widgets/detail_parts.dart';
 import '../widgets/states/empty_state.dart';
 
-class GradeDetailPage extends StatelessWidget {
-  final Subject subject;
-  // Pass an empty list (e.g. from an API that hasn't posted grades yet) to
-  // show the "no grade available" empty state instead of the grade card.
-  final List<Map<String, Object>>? assessments;
+class GradeDetailPage extends StatefulWidget {
+  const GradeDetailPage({super.key, required this.courseId});
 
-  const GradeDetailPage({super.key, required this.subject, this.assessments});
+  final int courseId;
+
+  @override
+  State<GradeDetailPage> createState() => _GradeDetailPageState();
+}
+
+class _GradeDetailPageState extends State<GradeDetailPage> {
+  // Streams are created once; creating them inside build() would resubscribe
+  // to the database on every rebuild.
+  late final Stream<Course?> _course;
+  late final Stream<List<Assessment>> _assessments;
+
+  @override
+  void initState() {
+    super.initState();
+    final repo = context.read<NexaRepository>();
+    _course = repo.watchCourse(widget.courseId);
+    _assessments = repo.watchAssessments(widget.courseId);
+  }
+
+  String _statusText(Assessment a) => switch (a.status) {
+        AssessmentStatus.onTime => 'On-Time, ${a.score ?? 0}',
+        AssessmentStatus.late => 'Late, ${a.score ?? 0}',
+        AssessmentStatus.missing => "Didn't Submit",
+      };
+
+  Color _statusColor(Assessment a) => switch (a.status) {
+        AssessmentStatus.onTime => AppColor.Success,
+        AssessmentStatus.late => AppColor.Average,
+        AssessmentStatus.missing => AppColor.Fail,
+      };
 
   @override
   Widget build(BuildContext context) {
-    final data = assessments ??
-        [
-          {'label': 'Meeting 1 Assignment', 'status': 'On-Time, 80', 'color': AppColor.Success},
-          {'label': 'Meeting 2 Assignment', 'status': 'On-Time, 90', 'color': AppColor.Success},
-          {'label': 'Meeting 3 Assignment', 'status': 'Late, 40', 'color': AppColor.Average},
-          {'label': 'Meeting 4 Assignment', 'status': "Didn't Submit", 'color': AppColor.Fail},
-          {'label': 'Meeting 5 Assignment', 'status': 'On-Time, 60', 'color': AppColor.Success},
-          {'label': 'Meeting 6 Assignment', 'status': 'On-Time, 55', 'color': AppColor.Success},
-        ];
-
     return Scaffold(
       backgroundColor: AppColor.Background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back, color: AppColor.Primary),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(subject.name, style: AppTextStyles.subheading.copyWith(fontSize: 18)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(color: AppColor.Secondary, borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  children: [
-                    Text('Grade', style: AppTextStyles.body.copyWith(fontSize: 14)),
-                    Text(data.isEmpty ? '00' : '${subject.grade}', style: AppTextStyles.heading.copyWith(fontSize: 40)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _statBox('Task', data.isEmpty ? '0' : '80', AppColor.SubjectGreen),
-                  _statBox('Attend', data.isEmpty ? '0' : '99', AppColor.SubjectBlue),
-                  _statBox('UTS', data.isEmpty ? '0' : '100', AppColor.SubjectPurple),
-                  _statBox('UAS', data.isEmpty ? '0' : '99', AppColor.SubjectYellow),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text('Assignment Assessment', style: AppTextStyles.subheading.copyWith(fontSize: 16)),
-              const SizedBox(height: 8),
-              if (data.isEmpty)
-                const EmptyState(
-                  icon: Icons.emoji_events_outlined,
-                  message: 'There is no grade available for this course yet.',
-                )
-              else
-                ...data.map((a) => Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: (a['color'] as Color).withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(10),
+        child: StreamBuilder<Course?>(
+          stream: _course,
+          builder: (context, courseSnap) {
+            final course = courseSnap.data;
+            return StreamBuilder<List<Assessment>>(
+              stream: _assessments,
+              builder: (context, listSnap) {
+                final items = listSnap.data ?? const <Assessment>[];
+                final empty = course == null || items.isEmpty;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DetailTopBar(title: course?.name ?? ''),
+                      const SizedBox(height: 16),
+                      BigNumberCard(
+                        label: 'Grade',
+                        value: empty ? '00' : '${course.grade}',
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const SizedBox(height: 16),
+                      Row(
                         children: [
-                          Text(a['label'] as String, style: AppTextStyles.body.copyWith(fontSize: 13)),
-                          Text(a['status'] as String, style: AppTextStyles.body.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+                          StatBox(label: 'Task', value: empty ? '0' : '${course.taskScore}', color: AppColor.SubjectGreen),
+                          StatBox(label: 'Attend', value: empty ? '0' : '${course.attendScore}', color: AppColor.SubjectBlue),
+                          StatBox(label: 'UTS', value: empty ? '0' : '${course.utsScore}', color: AppColor.SubjectPurple),
+                          StatBox(label: 'UAS', value: empty ? '0' : '${course.uasScore}', color: AppColor.SubjectYellow),
                         ],
                       ),
-                    )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _statBox(String label, String value, Color color) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          children: [
-            Text(label, style: AppTextStyles.body.copyWith(fontSize: 11)),
-            Text(value, style: AppTextStyles.subheading.copyWith(fontSize: 18)),
-          ],
+                      const SizedBox(height: 20),
+                      Text(
+                        'Assignment Assessment',
+                        style: AppTextStyles.subheading.copyWith(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      if (items.isEmpty)
+                        const EmptyState(
+                          icon: Icons.emoji_events_outlined,
+                          message: 'There is no grade available for this course yet.',
+                        )
+                      else
+                        ...items.map(
+                          (a) => StatusRow(
+                            label: a.title,
+                            status: _statusText(a),
+                            color: _statusColor(a),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

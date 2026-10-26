@@ -21,7 +21,7 @@ class EmptyState extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(fontSize: 13, color: AppColor.TextBody.withOpacity(0.6)),
+            style: AppTextStyles.body.copyWith(fontSize: 13, color: AppColor.TextBody.withValues(alpha: 0.6)),
           ),
         ],
       ),
