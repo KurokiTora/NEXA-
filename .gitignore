@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Flutter / Dart generated files
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Local Android configuration
+android/local.properties
+
+# Generated Flutter platform files
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/ephemeral/
