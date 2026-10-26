@@ -1,0 +1,103 @@
+
+   .detail-stats-grid,
+
+   .feedback-summary {
+
+      grid-template-columns: 1fr;
+
+      gap: 10px;
+
+   }
+
+   .detail-stat-card {
+
+      padding: 16px;
+
+   }
+
+   .student-profile {
+
+      align-items: flex-start;
+
+      flex-wrap: wrap;
+
+      padding: 18px;
+
+   }
+
+   .student-avatar {
+
+      width: 55px;
+
+      height: 55px;
+
+      font-size: 17px;
+
+   }
+
+   .student-profile-meta {
+
+      flex-direction: column;
+
+      gap: 10px;
+
+   }
+
+   .feedback-toolbar {
+
+      align-items: stretch;
+
+      flex-direction: column;
+
+      padding: 16px;
+
+   }
+
+   .feedback-controls {
+
+      align-items: stretch;
+
+      flex-direction: column;
+
+   }
+
+   .feedback-controls .classes-search {
+
+      width: 100%;
+
+   }
+
+   .feedback-list {
+
+      padding: 0 16px;
+
+   }
+
+   .feedback-item {
+
+      gap: 10px;
+
+   }
+
+   .ai-status-panel {
+
+      align-items: flex-start;
+
+      gap: 12px;
+
+      padding: 16px;
+
+   }
+
+   .ai-settings-panel,
+
+   .detail-table-panel,
+
+   .student-grades-panel,
+
+   .student-notes-panel {
+
+      padding: 16px;
+
+   }
+  
