@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
+import '../widgets/nexa_mark.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
 import 'dashboard.dart';
 import 'login.dart';
 
-/// Splash screen (~1.6 s, tap to skip).
-///   0%  - 20%  NEXA logo scale + fade in, glow pulse
-///   20% - 50%  shimmer sweep
-///   42% - 66%  accent line grows + tagline fades/slides up
-///   66% - 82%  hold
-///   82% - 100% screen fades out -> fade transition to next page
+/// Splash screen (~5 s), meant to mirror the reference video:
+///   0%  - 12%  X mark pops in (scale + fade)
+///   12% - 38%  X mark grows and its color floods the whole screen
+///   38% - 52%  flood fades away -> background returns, NEXA wordmark appears
+///   52% - 66%  tagline fades + slides up
+///   50% - 92%  loading line fills left -> right
+///   94% - 100% whole screen fades out
+/// then navigates to Dashboard / Login.
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -23,104 +26,72 @@ class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  late final Animation<double> _glowPulse;
-  late final Animation<double> _logoCrossOpacity;
+  late final Animation<double> _markScale; // pop in
+  late final Animation<double> _markOpacity;
+  late final Animation<double> _flood; // 0 -> 1 circle growth
+  late final Animation<double> _floodFade; // 0 -> 1 flood disappears
+  late final Animation<double> _logoOpacity;
   late final Animation<double> _logoScale;
-  late final Animation<double> _shimmerProgress;
-  late final Animation<double> _lineWidth;
   late final Animation<double> _taglineOpacity;
-  late final Animation<double> _taglineSlide;
+  late final Animation<Offset> _taglineSlide;
+  late final Animation<double> _loading;
   late final Animation<double> _screenFade;
 
-  static const _duration = Duration(milliseconds: 1600);
-  static const _logoWidth = 210.0;
+  static const _duration = Duration(milliseconds: 5000);
 
-  bool _navigated = false;
+  static const _logoWidth = 210.0;
+  static const _logoHeight = _logoWidth * 237 / 774;
+  static const _markSize = _logoHeight;
+
+  static const _loadingWidth = 160.0;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: _duration);
 
-    _glowPulse = TweenSequence<double>([
-      TweenSequenceItem(
-          tween: Tween(begin: 0.0, end: 1.0)
-              .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 20),
-      TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: 0.55)
-              .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 25),
-      TweenSequenceItem(
-          tween: Tween(begin: 0.55, end: 1.0)
-              .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 25),
-      TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: 0.0)
-              .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 30),
-    ]).animate(CurvedAnimation(
-        parent: _controller, curve: const Interval(0.0, 0.70)));
+    Animation<double> iv(double a, double b, Curve c) => CurvedAnimation(
+          parent: _controller,
+          curve: Interval(a, b, curve: c),
+        );
 
-    _logoCrossOpacity = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.20, curve: Curves.easeOut),
-    );
-    _logoScale = Tween<double>(begin: 0.92, end: 1.0).animate(CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.20, curve: Curves.easeOutCubic)));
+    // 1) X mark pops in
+    _markScale = Tween<double>(begin: 0.4, end: 1.0)
+        .animate(iv(0.0, 0.12, Curves.easeOutBack));
+    _markOpacity = iv(0.0, 0.08, Curves.easeOut);
 
-    _shimmerProgress = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.20, 0.50, curve: Curves.easeInOut),
-    );
+    // 2) flood: color grows from the X until it covers the screen
+    _flood = iv(0.12, 0.38, Curves.easeInOutCubic);
 
-    _lineWidth = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.42, 0.62, curve: Curves.easeOutCubic),
-    );
+    // 3) flood fades out, wordmark appears
+    _floodFade = iv(0.38, 0.52, Curves.easeOut);
+    _logoOpacity = iv(0.42, 0.56, Curves.easeOut);
+    _logoScale = Tween<double>(begin: 0.9, end: 1.0)
+        .animate(iv(0.42, 0.56, Curves.easeOutCubic));
 
-    _taglineOpacity = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.46, 0.66, curve: Curves.easeOut),
-    );
-    _taglineSlide = Tween<double>(begin: 12, end: 0).animate(CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.46, 0.66, curve: Curves.easeOutCubic)));
+    // 4) tagline + loading line
+    _taglineOpacity = iv(0.52, 0.66, Curves.easeOut);
+    _taglineSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(iv(0.52, 0.66, Curves.easeOutCubic));
+    _loading = iv(0.50, 0.92, Curves.easeInOut);
 
-    _screenFade = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.82, 1.0, curve: Curves.easeInCubic),
-    );
+    // 5) leave
+    _screenFade = iv(0.94, 1.0, Curves.easeInCubic);
 
     _controller.forward();
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) _goNext();
+      if (status == AnimationStatus.completed) {
+        if (!mounted) return;
+        final loggedIn = context.read<AuthState>().isLoggedIn;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                loggedIn ? const DashboardPage() : const LoginPage(),
+          ),
+        );
+      }
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    precacheImage(const AssetImage('asset/image/Nexa_Logo.png'), context);
-  }
-
-  void _goNext() {
-    if (_navigated || !mounted) return;
-    _navigated = true;
-    final loggedIn = context.read<AuthState>().isLoggedIn;
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (_, _, _) =>
-            loggedIn ? const DashboardPage() : const LoginPage(),
-        transitionsBuilder: (_, animation, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-          child: child,
-        ),
-      ),
-    );
   }
 
   @override
@@ -129,123 +100,110 @@ class _SplashPageState extends State<SplashPage>
     super.dispose();
   }
 
-  Widget _glow(double size, double alpha) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            AppColor.Primary.withValues(alpha: alpha),
-            AppColor.Primary.withValues(alpha: 0.0),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    // Circle big enough to cover the screen from the center.
+    final maxDiameter = size.longestSide * 2.2;
+
     return Scaffold(
       backgroundColor: AppColor.Background,
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _goNext, // tap to skip
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) {
-            final glow = _glowPulse.value;
-            return Opacity(
-              opacity: 1 - _screenFade.value,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 280,
-                      height: 200,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // outer soft glow
-                          Opacity(
-                              opacity: glow.clamp(0.0, 1.0),
-                              child: _glow(260, 0.12 * glow)),
-                          // inner stronger glow
-                          Opacity(
-                              opacity: glow.clamp(0.0, 1.0),
-                              child: _glow(150, 0.25 * glow)),
+      body: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final floodDiameter =
+              _markSize * 0.6 + (maxDiameter - _markSize * 0.6) * _flood.value;
+          final floodOpacity = (1 - _floodFade.value) *
+              (_flood.value > 0 ? 1.0 : 0.0);
 
-                          // logo + shimmer
-                          Opacity(
-                            opacity: _logoCrossOpacity.value,
-                            child: Transform.scale(
-                              scale: _logoScale.value,
-                              child: ShaderMask(
-                                blendMode: BlendMode.srcATop,
-                                shaderCallback: (bounds) {
-                                  final dx =
-                                      -1.5 + 4.0 * _shimmerProgress.value;
-                                  return LinearGradient(
-                                    begin: Alignment(-1 + dx, -0.4),
-                                    end: Alignment(0 + dx, 0.4),
-                                    colors: [
-                                      AppColor.Primary,
-                                      Colors.white.withValues(alpha: 0.9),
-                                      AppColor.Primary,
-                                    ],
-                                    stops: const [0.35, 0.5, 0.65],
-                                  ).createShader(bounds);
-                                },
-                                child: Image.asset(
-                                  'asset/image/Nexa_Logo.png',
-                                  width: _logoWidth,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+          return Opacity(
+            opacity: 1 - _screenFade.value,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Flood circle (X color covering the screen)
+                Opacity(
+                  opacity: floodOpacity,
+                  child: OverflowBox(
+                    minWidth: 0,
+                    minHeight: 0,
+                    maxWidth: double.infinity,
+                    maxHeight: double.infinity,
+                    child: Container(
+                      width: floodDiameter,
+                      height: floodDiameter,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColor.Primary,
                       ),
                     ),
+                  ),
+                ),
 
-                    // accent line
-                    Container(
-                      width: 48 * _lineWidth.value,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(2),
-                        gradient: LinearGradient(colors: [
-                          AppColor.Primary.withValues(alpha: 0.0),
-                          AppColor.Primary,
-                          AppColor.Primary.withValues(alpha: 0.0),
-                        ]),
+                // X mark (hidden once the flood takes over)
+                Opacity(
+                  opacity: _markOpacity.value * (1 - _flood.value),
+                  child: Transform.scale(
+                    scale: _markScale.value * (1 + 2.0 * _flood.value),
+                    child: NexaMark(size: _markSize),
+                  ),
+                ),
+
+                // Wordmark + tagline + loading line
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Opacity(
+                      opacity: _logoOpacity.value,
+                      child: Transform.scale(
+                        scale: _logoScale.value,
+                        child: Image.asset(
+                          'asset/image/Nexa_Logo.png',
+                          width: _logoWidth,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
-
-                    // tagline
                     Opacity(
                       opacity: _taglineOpacity.value,
                       child: Transform.translate(
-                        offset: Offset(0, _taglineSlide.value),
+                        offset: Offset(0, _taglineSlide.value.dy * 20),
                         child: Text(
                           'Your Intelligent Academic Companion',
                           style: AppTextStyles.body.copyWith(
                             fontSize: 12,
-                            letterSpacing: 1.2,
-                            color: AppColor.Primary.withValues(alpha: 0.75),
+                            color: AppColor.Primary.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    Opacity(
+                      opacity: _taglineOpacity.value,
+                      child: Container(
+                        width: _loadingWidth,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: AppColor.Primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: _loadingWidth * _loading.value,
+                          decoration: BoxDecoration(
+                            color: AppColor.Primary,
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

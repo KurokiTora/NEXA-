@@ -25,10 +25,10 @@ class AttendPage extends StatelessWidget {
       cardValue: summary.hasData ? '${summary.averageAttendance}%' : '-',
       extra: Row(
         children: [
-          _countBox(Icons.check_circle, '${summary.totalAttend}', 'Hadir', AppColor.Success),
-          _countBox(Icons.assignment_outlined, '${summary.totalPermit}', 'Izin', AppColor.SubjectBlue),
-          _countBox(Icons.event_busy, '${summary.totalSick}', 'Sakit', AppColor.Average),
-          _countBox(Icons.cancel, '${summary.totalAlpha}', 'Alfa', AppColor.Fail),
+          _countBox(Icons.check_circle, '${summary.totalAttend}', 'Attend', AppColor.Success),
+          _countBox(Icons.assignment_outlined, '${summary.totalPermit}', 'Permit', AppColor.SubjectBlue),
+          _countBox(Icons.event_busy, '${summary.totalSick}', 'Sick', AppColor.Average),
+          _countBox(Icons.cancel, '${summary.totalAlpha}', 'Alpha', AppColor.Fail),
         ],
       ),
       onCourseTap: (course) => Navigator.push(

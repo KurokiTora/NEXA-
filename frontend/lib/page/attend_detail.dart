@@ -5,7 +5,6 @@ import '../data/models/course.dart';
 import '../data/models/course_details.dart';
 import '../data/repositories/nexa_repository.dart';
 import '../style/color_style.dart';
-import '../style/text_style.dart';
 import '../widgets/detail_parts.dart';
 import '../widgets/states/empty_state.dart';
 
@@ -37,12 +36,67 @@ class _AttendDetailPageState extends State<AttendDetailPage> {
         AttendanceStatus.alpha => 'Alpha',
       };
 
-  Color _statusColor(AttendanceStatus s) => switch (s) {
-        AttendanceStatus.attend => AppColor.Success,
-        AttendanceStatus.permit => AppColor.Average,
-        AttendanceStatus.sick => AppColor.SubjectPurple,
-        AttendanceStatus.alpha => AppColor.Fail,
+  StatusTone _tone(AttendanceStatus s) => switch (s) {
+        AttendanceStatus.attend => StatusTone.success,
+        AttendanceStatus.permit => StatusTone.info,
+        AttendanceStatus.sick => StatusTone.average,
+        AttendanceStatus.alpha => StatusTone.fail,
       };
+
+  List<Widget> _content(Course course, List<AttendanceLog> items) {
+    return [
+      BigNumberCard(label: 'Attendance', value: '${course.attendPercent}%'),
+      const SizedBox(height: 16),
+      StatBoxRow(
+        children: [
+          StatBox(
+            label: 'Attend',
+            value: '${course.attendCount}',
+            color: AppColor.SubjectGreen,
+            icon: Icons.check_box_rounded,
+            iconColor: AppColor.SuccessBorder,
+          ),
+          StatBox(
+            label: 'Permit',
+            value: '${course.permitCount}',
+            color: AppColor.SubjectBlue,
+            icon: Icons.edit_document,
+            iconColor: AppColor.InfoBorder,
+          ),
+          StatBox(
+            label: 'Sick',
+            value: '${course.sickCount}',
+            color: AppColor.SubjectPeach,
+            icon: Icons.edit_calendar_rounded,
+            iconColor: AppColor.TextAverage,
+          ),
+          StatBox(
+            label: 'Alpha',
+            value: '${course.alphaCount}',
+            color: AppColor.SubjectPink,
+            icon: Icons.disabled_by_default_rounded,
+            iconColor: AppColor.FailBorder,
+          ),
+        ],
+      ),
+      const SizedBox(height: 24),
+      const DetailSectionTitle('History Attendance'),
+      const SizedBox(height: 12),
+      if (items.isEmpty)
+        const EmptyState(
+          icon: Icons.person_outline,
+          message: 'There is no attendance available for this course yet.',
+        )
+      else
+        ...items.map(
+          (h) => StatusRow(
+            label: h.title,
+            status: _statusText(h.status),
+            tone: _tone(h.status),
+          ),
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,48 +110,27 @@ class _AttendDetailPageState extends State<AttendDetailPage> {
             return StreamBuilder<List<AttendanceLog>>(
               stream: _history,
               builder: (context, listSnap) {
+                final loading =
+                    courseSnap.connectionState == ConnectionState.waiting ||
+                        listSnap.connectionState == ConnectionState.waiting;
                 final items = listSnap.data ?? const <AttendanceLog>[];
-                final empty = course == null || items.isEmpty;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DetailTopBar(title: course?.name ?? ''),
                       const SizedBox(height: 16),
-                      BigNumberCard(
-                        label: 'Attendance',
-                        value: empty ? '0%' : '${course.attendPercent}%',
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          StatBox(label: 'Attend', value: empty ? '0' : '${course.attendCount}', color: AppColor.SubjectGreen),
-                          StatBox(label: 'Permit', value: empty ? '0' : '${course.permitCount}', color: AppColor.Average),
-                          StatBox(label: 'Sick', value: empty ? '0' : '${course.sickCount}', color: AppColor.SubjectPurple),
-                          StatBox(label: 'Alpha', value: empty ? '0' : '${course.alphaCount}', color: AppColor.Fail),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'History Attendance',
-                        style: AppTextStyles.subheading.copyWith(fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      if (items.isEmpty)
+                      if (loading)
+                        const DetailSkeleton()
+                      else if (course == null)
                         const EmptyState(
-                          icon: Icons.person_outline,
-                          message: 'There is no attendance available for this course yet.',
+                          icon: Icons.school_outlined,
+                          message: 'This course is not available yet.',
                         )
                       else
-                        ...items.map(
-                          (h) => StatusRow(
-                            label: h.title,
-                            status: _statusText(h.status),
-                            color: _statusColor(h.status),
-                          ),
-                        ),
+                        ..._content(course, items),
                     ],
                   ),
                 );
