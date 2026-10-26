@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/models/course.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import 'course_palette.dart';
+import 'course_avatar.dart';
 
 /// Compact course row with 3 quick actions (attend / grade / feedback),
 /// used on the Dashboard. Fixed-width parts are kept small on purpose so the
@@ -32,13 +32,11 @@ class SubjectActionRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: courseColor(course.colorIndex),
-              borderRadius: BorderRadius.circular(8),
-            ),
+          CourseAvatar(
+            courseName: course.name,
+            colorIndex: course.colorIndex,
+            size: 30,
+            radius: 8,
           ),
           const SizedBox(width: 10),
           Expanded(

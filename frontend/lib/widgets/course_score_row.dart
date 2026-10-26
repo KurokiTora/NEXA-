@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/models/course.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import 'course_palette.dart';
+import 'course_avatar.dart';
 
 /// Row used by the Grade, Attend and Feedback lists: swatch, name/code,
 /// score, letter badge and a chevron.
@@ -27,13 +27,9 @@ class CourseScoreRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                color: courseColor(course.colorIndex),
-                borderRadius: BorderRadius.circular(6),
-              ),
+            CourseAvatar(
+              courseName: course.name,
+              colorIndex: course.colorIndex,
             ),
             const SizedBox(width: 14),
             Expanded(
