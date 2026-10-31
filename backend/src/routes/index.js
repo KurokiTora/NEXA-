@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authRoutes from './authRoutes.js';
+import authRoutes from './authroutes.js';
 import chatbotRoutes from './chatbotRoutes.js';
 
 const router = Router();
