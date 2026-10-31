@@ -1,6 +1,6 @@
 import { Router } from 'express';
-
-import authRoutes from './authroutes.js';
+import authRoutes from './authRoutes.js';
+import chatbotRoutes from './chatbotRoutes.js';
 
 const router = Router();
 
@@ -15,5 +15,8 @@ router.get('/health', (req, res) => {
 
 // Authentication
 router.use('/auth', authRoutes);
+
+// Chatbot
+router.use('/chatbot', chatbotRoutes);
 
 export default router;
