@@ -5,6 +5,7 @@ import App from "./app";
 import "./style/global.css";
 import "./style/layout.css";
 import "./style/pages.css";
+import "./style/login.css";
 
 const rootElement = document.getElementById("root");
 
