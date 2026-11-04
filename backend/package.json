@@ -1,0 +1,22 @@
+{
+  "name": "nexa-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "REST API for the NEXA mobile app, backed by the XAMPP MySQL database.",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "db:test": "node src/test-db.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7"
+  }
+}
