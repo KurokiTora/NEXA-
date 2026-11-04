@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "NEXA (debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/lib/main.dart",
+      "flutterMode": "debug"
+    },
+    {
+      "name": "NEXA (profile)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/lib/main.dart",
+      "flutterMode": "profile"
+    }
+  ]
+}
