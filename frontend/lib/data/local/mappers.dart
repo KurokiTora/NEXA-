@@ -1,5 +1,7 @@
+import '../models/class_schedule.dart';
 import '../models/course.dart';
 import '../models/course_details.dart';
+import '../models/feedback_alert.dart';
 import '../models/student.dart';
 import 'app_database.dart';
 
@@ -59,4 +61,24 @@ extension AttendanceRowMapper on AttendanceRow {
 
 extension FeedbackRowMapper on FeedbackRow {
   FeedbackNote toModel() => FeedbackNote(title: title, body: body);
+}
+
+extension ClassScheduleRowMapper on ClassScheduleRow {
+  ClassSchedule toModel() => ClassSchedule(
+        id: id,
+        courseId: courseId,
+        courseName: courseName,
+        room: room,
+        dayOfWeek: dayOfWeek,
+        startMinutes: startMinutes,
+        endMinutes: endMinutes,
+      );
+}
+
+extension FeedbackAlertMapper on FeedbackRow {
+  FeedbackAlert toAlert(String courseName) => FeedbackAlert(
+        courseId: courseId,
+        courseName: courseName,
+        note: FeedbackNote(title: title, body: body),
+      );
 }

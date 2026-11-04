@@ -3,8 +3,10 @@ import '../../core/errors.dart';
 import '../../core/storage/secure_token_storage.dart';
 import '../local/mappers.dart';
 import '../local/nexa_local_data_source.dart';
+import '../models/class_schedule.dart';
 import '../models/course.dart';
 import '../models/course_details.dart';
+import '../models/feedback_alert.dart';
 import '../models/student.dart';
 import '../remote/nexa_api.dart';
 
@@ -54,6 +56,53 @@ class NexaRepository {
   Stream<List<FeedbackNote>> watchFeedback(int courseId) => _local
       .watchFeedback(courseId)
       .map((rows) => rows.map((r) => r.toModel()).toList());
+
+  Stream<List<ClassSchedule>> watchSchedules() => _local
+      .watchAllSchedules()
+      .map((rows) => rows.map((r) => r.toModel()).toList());
+
+  /// One-shot read used by the notification scheduler.
+  Future<List<ClassSchedule>> schedules() async {
+    final rows = await _local.getAllSchedules();
+    return rows.map((r) => r.toModel()).toList();
+  }
+
+  // ------------------------- feedback change detection -----------------------
+
+  /// True when there is already cached data. On the very first sync every
+  /// feedback note is "new", but we don't want to spam the user with
+  /// notifications for the whole history.
+  Future<bool> hasCachedCourses() async {
+    final rows = await _local.getAllCourses();
+    return rows.isNotEmpty;
+  }
+
+  Future<Set<String>> feedbackSignatures() async {
+    final rows = await _local.getAllFeedback();
+    return {
+      for (final r in rows)
+        FeedbackAlert.signatureFor(r.courseId, r.title, r.body),
+    };
+  }
+
+  /// Feedback rows that were not present in [knownSignatures].
+  Future<List<FeedbackAlert>> feedbackAlertsNotIn(
+    Set<String> knownSignatures,
+  ) async {
+    final feedbackRows = await _local.getAllFeedback();
+    final courseRows = await _local.getAllCourses();
+    final names = {for (final c in courseRows) c.id: c.name};
+
+    final alerts = <FeedbackAlert>[];
+    for (final row in feedbackRows) {
+      final alert =
+          row.toAlert(names[row.courseId] ?? 'Mata Kuliah');
+      if (!knownSignatures.contains(alert.signature)) {
+        alerts.add(alert);
+      }
+    }
+    return alerts;
+  }
 
   // --------------------------------- syncing ---------------------------------
 

@@ -25,38 +25,53 @@ import 'nexa_api.dart';
 ///                                              permitCount, sickCount, alphaCount,
 ///                                              assessments:[{title,status,score}],
 ///                                              attendance:[{title,status}],
-///                                              feedback:[{title,body}] } ]
+///                                              feedback:[{title,body}],
+///                                              schedule:[{id,dayOfWeek,
+///                                                start,startMinutes,room,end}] } ]
 ///
 ///   assessments.status : "onTime" | "late" | "missing"
 ///   attendance.status  : "attend" | "permit" | "sick" | "alpha"
+///   schedule.dayOfWeek : 1 (Monday) .. 7 (Sunday)
+///   schedule.start/end : "HH:mm" (local campus time)
 class HttpNexaApi implements NexaApi {
   HttpNexaApi({
-    required this.baseUrl,
+    required List<String> baseUrls,
     http.Client? client,
     this.timeout = const Duration(seconds: 15),
-  }) : _client = client ?? http.Client();
+  }) : assert(baseUrls.isNotEmpty),
+       _baseUrls = List.unmodifiable(baseUrls),
+       _currentBaseUrl = baseUrls.first,
+       _client = client ?? http.Client();
 
-  final String baseUrl;
+  final List<String> _baseUrls;
   final Duration timeout;
   final http.Client _client;
 
+  /// The candidate that answered last. Reusing it avoids probing every URL on
+  /// each request once the emulator/phone/host has been identified.
+  String _currentBaseUrl;
+
   static const _jsonHeaders = {'Content-Type': 'application/json'};
 
-  Uri _uri(String path) => Uri.parse('$baseUrl$path');
+  Uri _uri(String path) => Uri.parse('$_currentBaseUrl$path');
 
-  Map<String, String> _bearer(String token) =>
-      {'Authorization': 'Bearer $token', 'Accept': 'application/json'};
+  Map<String, String> _bearer(String token) => {
+    'Authorization': 'Bearer $token',
+    'Accept': 'application/json',
+  };
 
   @override
   Future<AuthSession> login({
     required String nim,
     required String password,
   }) async {
-    final res = await _send(() => _client.post(
-          _uri('/auth/login'),
-          headers: _jsonHeaders,
-          body: jsonEncode({'nim': nim, 'password': password}),
-        ));
+    final res = await _send(
+      () => _client.post(
+        _uri('/auth/login'),
+        headers: _jsonHeaders,
+        body: jsonEncode({'nim': nim, 'password': password}),
+      ),
+    );
     if (res.statusCode == 400 || res.statusCode == 401) {
       throw const AuthFailure();
     }
@@ -66,11 +81,13 @@ class HttpNexaApi implements NexaApi {
 
   @override
   Future<AuthSession> refreshSession(String refreshToken) async {
-    final res = await _send(() => _client.post(
-          _uri('/auth/refresh'),
-          headers: _jsonHeaders,
-          body: jsonEncode({'refreshToken': refreshToken}),
-        ));
+    final res = await _send(
+      () => _client.post(
+        _uri('/auth/refresh'),
+        headers: _jsonHeaders,
+        body: jsonEncode({'refreshToken': refreshToken}),
+      ),
+    );
     if (res.statusCode == 400 || res.statusCode == 401) {
       throw const UnauthorizedFailure();
     }
@@ -81,9 +98,15 @@ class HttpNexaApi implements NexaApi {
   @override
   Future<RemoteSnapshot> fetchSnapshot(String accessToken) async {
     final results = await Future.wait([
-      _send(() => _client.get(_uri('/student/me'), headers: _bearer(accessToken))),
-      _send(() =>
-          _client.get(_uri('/student/courses'), headers: _bearer(accessToken))),
+      _send(
+        () => _client.get(_uri('/student/me'), headers: _bearer(accessToken)),
+      ),
+      _send(
+        () => _client.get(
+          _uri('/student/courses'),
+          headers: _bearer(accessToken),
+        ),
+      ),
     ]);
     final meRes = results[0];
     final coursesRes = results[1];
@@ -102,20 +125,35 @@ class HttpNexaApi implements NexaApi {
   // ------------------------------- helpers -------------------------------
 
   Future<http.Response> _send(Future<http.Response> Function() request) async {
-    try {
-      return await request().timeout(timeout);
-    } on TimeoutException {
-      throw const NetworkFailure('Request timed out');
-    } on SocketException {
-      throw const NetworkFailure();
-    } on http.ClientException {
-      throw const NetworkFailure();
+    final candidates = [
+      _currentBaseUrl,
+      ..._baseUrls.where((base) => base != _currentBaseUrl),
+    ];
+    Object? lastError;
+
+    for (final base in candidates) {
+      _currentBaseUrl = base;
+      try {
+        return await request().timeout(timeout);
+      } on TimeoutException {
+        lastError = const NetworkFailure('Request timed out');
+      } on SocketException {
+        lastError = const NetworkFailure();
+      } on http.ClientException {
+        lastError = const NetworkFailure();
+      }
     }
+
+    throw lastError ?? const NetworkFailure();
   }
 
   void _ensureOk(http.Response res) {
-    if (res.statusCode == 401) throw const UnauthorizedFailure();
-    if (res.statusCode >= 500) throw ServerFailure('Server error ${res.statusCode}');
+    if (res.statusCode == 401) {
+      throw const UnauthorizedFailure();
+    }
+    if (res.statusCode >= 500) {
+      throw ServerFailure('Server error ${res.statusCode}');
+    }
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw ServerFailure('Unexpected response ${res.statusCode}');
     }

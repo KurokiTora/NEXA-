@@ -1,3 +1,4 @@
+import 'class_schedule.dart';
 import 'course_details.dart';
 
 class Course {
@@ -66,6 +67,7 @@ class CourseBundle {
     required this.assessments,
     required this.attendance,
     required this.feedback,
+    this.schedules = const [],
   });
 
   final Course course;
@@ -73,17 +75,33 @@ class CourseBundle {
   final List<AttendanceLog> attendance;
   final List<FeedbackNote> feedback;
 
+  /// Weekly class sessions for this course (used for reminders).
+  final List<ClassSchedule> schedules;
+
   factory CourseBundle.fromJson(Map<String, dynamic> json) {
     List<T> list<T>(String key, T Function(Map<String, dynamic>) parse) =>
         ((json[key] as List?) ?? const [])
             .map((e) => parse(e as Map<String, dynamic>))
             .toList();
 
+    final course = Course.fromJson(json);
+    final rawSchedules =
+        (json['schedule'] ?? json['schedules']) as List? ?? const [];
+
     return CourseBundle(
-      course: Course.fromJson(json),
+      course: course,
       assessments: list('assessments', Assessment.fromJson),
       attendance: list('attendance', AttendanceLog.fromJson),
       feedback: list('feedback', FeedbackNote.fromJson),
+      schedules: [
+        for (var i = 0; i < rawSchedules.length; i++)
+          ClassSchedule.fromJson(
+            rawSchedules[i] as Map<String, dynamic>,
+            courseId: course.id,
+            courseName: course.name,
+            position: i,
+          ),
+      ],
     );
   }
 }

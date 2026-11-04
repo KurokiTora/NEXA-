@@ -2481,6 +2481,474 @@ class FeedbackNotesCompanion extends UpdateCompanion<FeedbackRow> {
   }
 }
 
+class $ClassSchedulesTable extends ClassSchedules
+    with TableInfo<$ClassSchedulesTable, ClassScheduleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClassSchedulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _courseIdMeta = const VerificationMeta(
+    'courseId',
+  );
+  @override
+  late final GeneratedColumn<int> courseId = GeneratedColumn<int>(
+    'course_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES courses (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _courseNameMeta = const VerificationMeta(
+    'courseName',
+  );
+  @override
+  late final GeneratedColumn<String> courseName = GeneratedColumn<String>(
+    'course_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roomMeta = const VerificationMeta('room');
+  @override
+  late final GeneratedColumn<String> room = GeneratedColumn<String>(
+    'room',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayOfWeekMeta = const VerificationMeta(
+    'dayOfWeek',
+  );
+  @override
+  late final GeneratedColumn<int> dayOfWeek = GeneratedColumn<int>(
+    'day_of_week',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startMinutesMeta = const VerificationMeta(
+    'startMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> startMinutes = GeneratedColumn<int>(
+    'start_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endMinutesMeta = const VerificationMeta(
+    'endMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> endMinutes = GeneratedColumn<int>(
+    'end_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    courseId,
+    courseName,
+    room,
+    dayOfWeek,
+    startMinutes,
+    endMinutes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'class_schedules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ClassScheduleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('course_id')) {
+      context.handle(
+        _courseIdMeta,
+        courseId.isAcceptableOrUnknown(data['course_id']!, _courseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_courseIdMeta);
+    }
+    if (data.containsKey('course_name')) {
+      context.handle(
+        _courseNameMeta,
+        courseName.isAcceptableOrUnknown(data['course_name']!, _courseNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_courseNameMeta);
+    }
+    if (data.containsKey('room')) {
+      context.handle(
+        _roomMeta,
+        room.isAcceptableOrUnknown(data['room']!, _roomMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roomMeta);
+    }
+    if (data.containsKey('day_of_week')) {
+      context.handle(
+        _dayOfWeekMeta,
+        dayOfWeek.isAcceptableOrUnknown(data['day_of_week']!, _dayOfWeekMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayOfWeekMeta);
+    }
+    if (data.containsKey('start_minutes')) {
+      context.handle(
+        _startMinutesMeta,
+        startMinutes.isAcceptableOrUnknown(
+          data['start_minutes']!,
+          _startMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startMinutesMeta);
+    }
+    if (data.containsKey('end_minutes')) {
+      context.handle(
+        _endMinutesMeta,
+        endMinutes.isAcceptableOrUnknown(data['end_minutes']!, _endMinutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endMinutesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ClassScheduleRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ClassScheduleRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      courseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}course_id'],
+      )!,
+      courseName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}course_name'],
+      )!,
+      room: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}room'],
+      )!,
+      dayOfWeek: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}day_of_week'],
+      )!,
+      startMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_minutes'],
+      )!,
+      endMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_minutes'],
+      )!,
+    );
+  }
+
+  @override
+  $ClassSchedulesTable createAlias(String alias) {
+    return $ClassSchedulesTable(attachedDatabase, alias);
+  }
+}
+
+class ClassScheduleRow extends DataClass
+    implements Insertable<ClassScheduleRow> {
+  /// Server id, or a deterministic fallback from the course + position.
+  final int id;
+  final int courseId;
+
+  /// Denormalised so notification scheduling doesn't need a join.
+  final String courseName;
+  final String room;
+
+  /// DateTime.monday (1) .. DateTime.sunday (7).
+  final int dayOfWeek;
+
+  /// Minutes since midnight.
+  final int startMinutes;
+  final int endMinutes;
+  const ClassScheduleRow({
+    required this.id,
+    required this.courseId,
+    required this.courseName,
+    required this.room,
+    required this.dayOfWeek,
+    required this.startMinutes,
+    required this.endMinutes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['course_id'] = Variable<int>(courseId);
+    map['course_name'] = Variable<String>(courseName);
+    map['room'] = Variable<String>(room);
+    map['day_of_week'] = Variable<int>(dayOfWeek);
+    map['start_minutes'] = Variable<int>(startMinutes);
+    map['end_minutes'] = Variable<int>(endMinutes);
+    return map;
+  }
+
+  ClassSchedulesCompanion toCompanion(bool nullToAbsent) {
+    return ClassSchedulesCompanion(
+      id: Value(id),
+      courseId: Value(courseId),
+      courseName: Value(courseName),
+      room: Value(room),
+      dayOfWeek: Value(dayOfWeek),
+      startMinutes: Value(startMinutes),
+      endMinutes: Value(endMinutes),
+    );
+  }
+
+  factory ClassScheduleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ClassScheduleRow(
+      id: serializer.fromJson<int>(json['id']),
+      courseId: serializer.fromJson<int>(json['courseId']),
+      courseName: serializer.fromJson<String>(json['courseName']),
+      room: serializer.fromJson<String>(json['room']),
+      dayOfWeek: serializer.fromJson<int>(json['dayOfWeek']),
+      startMinutes: serializer.fromJson<int>(json['startMinutes']),
+      endMinutes: serializer.fromJson<int>(json['endMinutes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'courseId': serializer.toJson<int>(courseId),
+      'courseName': serializer.toJson<String>(courseName),
+      'room': serializer.toJson<String>(room),
+      'dayOfWeek': serializer.toJson<int>(dayOfWeek),
+      'startMinutes': serializer.toJson<int>(startMinutes),
+      'endMinutes': serializer.toJson<int>(endMinutes),
+    };
+  }
+
+  ClassScheduleRow copyWith({
+    int? id,
+    int? courseId,
+    String? courseName,
+    String? room,
+    int? dayOfWeek,
+    int? startMinutes,
+    int? endMinutes,
+  }) => ClassScheduleRow(
+    id: id ?? this.id,
+    courseId: courseId ?? this.courseId,
+    courseName: courseName ?? this.courseName,
+    room: room ?? this.room,
+    dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endMinutes: endMinutes ?? this.endMinutes,
+  );
+  ClassScheduleRow copyWithCompanion(ClassSchedulesCompanion data) {
+    return ClassScheduleRow(
+      id: data.id.present ? data.id.value : this.id,
+      courseId: data.courseId.present ? data.courseId.value : this.courseId,
+      courseName: data.courseName.present
+          ? data.courseName.value
+          : this.courseName,
+      room: data.room.present ? data.room.value : this.room,
+      dayOfWeek: data.dayOfWeek.present ? data.dayOfWeek.value : this.dayOfWeek,
+      startMinutes: data.startMinutes.present
+          ? data.startMinutes.value
+          : this.startMinutes,
+      endMinutes: data.endMinutes.present
+          ? data.endMinutes.value
+          : this.endMinutes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClassScheduleRow(')
+          ..write('id: $id, ')
+          ..write('courseId: $courseId, ')
+          ..write('courseName: $courseName, ')
+          ..write('room: $room, ')
+          ..write('dayOfWeek: $dayOfWeek, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    courseId,
+    courseName,
+    room,
+    dayOfWeek,
+    startMinutes,
+    endMinutes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ClassScheduleRow &&
+          other.id == this.id &&
+          other.courseId == this.courseId &&
+          other.courseName == this.courseName &&
+          other.room == this.room &&
+          other.dayOfWeek == this.dayOfWeek &&
+          other.startMinutes == this.startMinutes &&
+          other.endMinutes == this.endMinutes);
+}
+
+class ClassSchedulesCompanion extends UpdateCompanion<ClassScheduleRow> {
+  final Value<int> id;
+  final Value<int> courseId;
+  final Value<String> courseName;
+  final Value<String> room;
+  final Value<int> dayOfWeek;
+  final Value<int> startMinutes;
+  final Value<int> endMinutes;
+  const ClassSchedulesCompanion({
+    this.id = const Value.absent(),
+    this.courseId = const Value.absent(),
+    this.courseName = const Value.absent(),
+    this.room = const Value.absent(),
+    this.dayOfWeek = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+  });
+  ClassSchedulesCompanion.insert({
+    this.id = const Value.absent(),
+    required int courseId,
+    required String courseName,
+    required String room,
+    required int dayOfWeek,
+    required int startMinutes,
+    required int endMinutes,
+  }) : courseId = Value(courseId),
+       courseName = Value(courseName),
+       room = Value(room),
+       dayOfWeek = Value(dayOfWeek),
+       startMinutes = Value(startMinutes),
+       endMinutes = Value(endMinutes);
+  static Insertable<ClassScheduleRow> custom({
+    Expression<int>? id,
+    Expression<int>? courseId,
+    Expression<String>? courseName,
+    Expression<String>? room,
+    Expression<int>? dayOfWeek,
+    Expression<int>? startMinutes,
+    Expression<int>? endMinutes,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (courseId != null) 'course_id': courseId,
+      if (courseName != null) 'course_name': courseName,
+      if (room != null) 'room': room,
+      if (dayOfWeek != null) 'day_of_week': dayOfWeek,
+      if (startMinutes != null) 'start_minutes': startMinutes,
+      if (endMinutes != null) 'end_minutes': endMinutes,
+    });
+  }
+
+  ClassSchedulesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? courseId,
+    Value<String>? courseName,
+    Value<String>? room,
+    Value<int>? dayOfWeek,
+    Value<int>? startMinutes,
+    Value<int>? endMinutes,
+  }) {
+    return ClassSchedulesCompanion(
+      id: id ?? this.id,
+      courseId: courseId ?? this.courseId,
+      courseName: courseName ?? this.courseName,
+      room: room ?? this.room,
+      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+      startMinutes: startMinutes ?? this.startMinutes,
+      endMinutes: endMinutes ?? this.endMinutes,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (courseId.present) {
+      map['course_id'] = Variable<int>(courseId.value);
+    }
+    if (courseName.present) {
+      map['course_name'] = Variable<String>(courseName.value);
+    }
+    if (room.present) {
+      map['room'] = Variable<String>(room.value);
+    }
+    if (dayOfWeek.present) {
+      map['day_of_week'] = Variable<int>(dayOfWeek.value);
+    }
+    if (startMinutes.present) {
+      map['start_minutes'] = Variable<int>(startMinutes.value);
+    }
+    if (endMinutes.present) {
+      map['end_minutes'] = Variable<int>(endMinutes.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClassSchedulesCompanion(')
+          ..write('id: $id, ')
+          ..write('courseId: $courseId, ')
+          ..write('courseName: $courseName, ')
+          ..write('room: $room, ')
+          ..write('dayOfWeek: $dayOfWeek, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2489,6 +2957,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AssessmentsTable assessments = $AssessmentsTable(this);
   late final $AttendanceLogsTable attendanceLogs = $AttendanceLogsTable(this);
   late final $FeedbackNotesTable feedbackNotes = $FeedbackNotesTable(this);
+  late final $ClassSchedulesTable classSchedules = $ClassSchedulesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2499,6 +2968,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     assessments,
     attendanceLogs,
     feedbackNotes,
+    classSchedules,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2522,6 +2992,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('feedback_notes', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'courses',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('class_schedules', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2870,6 +3347,24 @@ final class $$CoursesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ClassSchedulesTable, List<ClassScheduleRow>>
+  _classSchedulesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.classSchedules,
+    aliasName: 'courses__id__class_schedules__course_id',
+  );
+
+  $$ClassSchedulesTableProcessedTableManager get classSchedulesRefs {
+    final manager = $$ClassSchedulesTableTableManager(
+      $_db,
+      $_db.classSchedules,
+    ).filter((f) => f.courseId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_classSchedulesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CoursesTableFilterComposer
@@ -3027,6 +3522,31 @@ class $$CoursesTableFilterComposer
           }) => $$FeedbackNotesTableFilterComposer(
             $db: $db,
             $table: $db.feedbackNotes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> classSchedulesRefs(
+    Expression<bool> Function($$ClassSchedulesTableFilterComposer f) f,
+  ) {
+    final $$ClassSchedulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.classSchedules,
+      getReferencedColumn: (t) => t.courseId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClassSchedulesTableFilterComposer(
+            $db: $db,
+            $table: $db.classSchedules,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3272,6 +3792,31 @@ class $$CoursesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> classSchedulesRefs<T extends Object>(
+    Expression<T> Function($$ClassSchedulesTableAnnotationComposer a) f,
+  ) {
+    final $$ClassSchedulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.classSchedules,
+      getReferencedColumn: (t) => t.courseId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClassSchedulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.classSchedules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CoursesTableTableManager
@@ -3291,6 +3836,7 @@ class $$CoursesTableTableManager
             bool assessmentsRefs,
             bool attendanceLogsRefs,
             bool feedbackNotesRefs,
+            bool classSchedulesRefs,
           })
         > {
   $$CoursesTableTableManager(_$AppDatabase db, $CoursesTable table)
@@ -3389,6 +3935,7 @@ class $$CoursesTableTableManager
                 assessmentsRefs = false,
                 attendanceLogsRefs = false,
                 feedbackNotesRefs = false,
+                classSchedulesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -3396,6 +3943,7 @@ class $$CoursesTableTableManager
                     if (assessmentsRefs) db.assessments,
                     if (attendanceLogsRefs) db.attendanceLogs,
                     if (feedbackNotesRefs) db.feedbackNotes,
+                    if (classSchedulesRefs) db.classSchedules,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3463,6 +4011,27 @@ class $$CoursesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (classSchedulesRefs)
+                        await $_getPrefetchedData<
+                          CourseRow,
+                          $CoursesTable,
+                          ClassScheduleRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CoursesTableReferences
+                              ._classSchedulesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CoursesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).classSchedulesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.courseId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3487,6 +4056,7 @@ typedef $$CoursesTableProcessedTableManager =
         bool assessmentsRefs,
         bool attendanceLogsRefs,
         bool feedbackNotesRefs,
+        bool classSchedulesRefs,
       })
     >;
 typedef $$AssessmentsTableCreateCompanionBuilder =
@@ -4445,6 +5015,366 @@ typedef $$FeedbackNotesTableProcessedTableManager =
       FeedbackRow,
       PrefetchHooks Function({bool courseId})
     >;
+typedef $$ClassSchedulesTableCreateCompanionBuilder =
+    ClassSchedulesCompanion Function({
+      Value<int> id,
+      required int courseId,
+      required String courseName,
+      required String room,
+      required int dayOfWeek,
+      required int startMinutes,
+      required int endMinutes,
+    });
+typedef $$ClassSchedulesTableUpdateCompanionBuilder =
+    ClassSchedulesCompanion Function({
+      Value<int> id,
+      Value<int> courseId,
+      Value<String> courseName,
+      Value<String> room,
+      Value<int> dayOfWeek,
+      Value<int> startMinutes,
+      Value<int> endMinutes,
+    });
+
+final class $$ClassSchedulesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ClassSchedulesTable, ClassScheduleRow> {
+  $$ClassSchedulesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CoursesTable _courseIdTable(_$AppDatabase db) =>
+      db.courses.createAlias('class_schedules__course_id__courses__id');
+
+  $$CoursesTableProcessedTableManager get courseId {
+    final $_column = $_itemColumn<int>('course_id')!;
+
+    final manager = $$CoursesTableTableManager(
+      $_db,
+      $_db.courses,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_courseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ClassSchedulesTableFilterComposer
+    extends Composer<_$AppDatabase, $ClassSchedulesTable> {
+  $$ClassSchedulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get courseName => $composableBuilder(
+    column: $table.courseName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get room => $composableBuilder(
+    column: $table.room,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dayOfWeek => $composableBuilder(
+    column: $table.dayOfWeek,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CoursesTableFilterComposer get courseId {
+    final $$CoursesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courses,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoursesTableFilterComposer(
+            $db: $db,
+            $table: $db.courses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassSchedulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ClassSchedulesTable> {
+  $$ClassSchedulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get courseName => $composableBuilder(
+    column: $table.courseName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get room => $composableBuilder(
+    column: $table.room,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dayOfWeek => $composableBuilder(
+    column: $table.dayOfWeek,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CoursesTableOrderingComposer get courseId {
+    final $$CoursesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courses,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoursesTableOrderingComposer(
+            $db: $db,
+            $table: $db.courses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassSchedulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ClassSchedulesTable> {
+  $$ClassSchedulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get courseName => $composableBuilder(
+    column: $table.courseName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get room =>
+      $composableBuilder(column: $table.room, builder: (column) => column);
+
+  GeneratedColumn<int> get dayOfWeek =>
+      $composableBuilder(column: $table.dayOfWeek, builder: (column) => column);
+
+  GeneratedColumn<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => column,
+  );
+
+  $$CoursesTableAnnotationComposer get courseId {
+    final $$CoursesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courses,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoursesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.courses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassSchedulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ClassSchedulesTable,
+          ClassScheduleRow,
+          $$ClassSchedulesTableFilterComposer,
+          $$ClassSchedulesTableOrderingComposer,
+          $$ClassSchedulesTableAnnotationComposer,
+          $$ClassSchedulesTableCreateCompanionBuilder,
+          $$ClassSchedulesTableUpdateCompanionBuilder,
+          (ClassScheduleRow, $$ClassSchedulesTableReferences),
+          ClassScheduleRow,
+          PrefetchHooks Function({bool courseId})
+        > {
+  $$ClassSchedulesTableTableManager(
+    _$AppDatabase db,
+    $ClassSchedulesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClassSchedulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClassSchedulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClassSchedulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> courseId = const Value.absent(),
+                Value<String> courseName = const Value.absent(),
+                Value<String> room = const Value.absent(),
+                Value<int> dayOfWeek = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<int> endMinutes = const Value.absent(),
+              }) => ClassSchedulesCompanion(
+                id: id,
+                courseId: courseId,
+                courseName: courseName,
+                room: room,
+                dayOfWeek: dayOfWeek,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int courseId,
+                required String courseName,
+                required String room,
+                required int dayOfWeek,
+                required int startMinutes,
+                required int endMinutes,
+              }) => ClassSchedulesCompanion.insert(
+                id: id,
+                courseId: courseId,
+                courseName: courseName,
+                room: room,
+                dayOfWeek: dayOfWeek,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ClassSchedulesTable, ClassScheduleRow>(table),
+                  $$ClassSchedulesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({courseId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (courseId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.courseId,
+                        referencedTable: $$ClassSchedulesTableReferences
+                            ._courseIdTable(db),
+                        referencedColumn: $$ClassSchedulesTableReferences
+                            ._courseIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ClassSchedulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ClassSchedulesTable,
+      ClassScheduleRow,
+      $$ClassSchedulesTableFilterComposer,
+      $$ClassSchedulesTableOrderingComposer,
+      $$ClassSchedulesTableAnnotationComposer,
+      $$ClassSchedulesTableCreateCompanionBuilder,
+      $$ClassSchedulesTableUpdateCompanionBuilder,
+      (ClassScheduleRow, $$ClassSchedulesTableReferences),
+      ClassScheduleRow,
+      PrefetchHooks Function({bool courseId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4459,4 +5389,6 @@ class $AppDatabaseManager {
       $$AttendanceLogsTableTableManager(_db, _db.attendanceLogs);
   $$FeedbackNotesTableTableManager get feedbackNotes =>
       $$FeedbackNotesTableTableManager(_db, _db.feedbackNotes);
+  $$ClassSchedulesTableTableManager get classSchedules =>
+      $$ClassSchedulesTableTableManager(_db, _db.classSchedules);
 }

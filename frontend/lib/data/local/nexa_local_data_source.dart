@@ -42,6 +42,12 @@ class NexaLocalDataSource {
             ..orderBy([(t) => OrderingTerm.asc(t.position)]))
           .watch();
 
+  Stream<List<ClassScheduleRow>> watchAllSchedules() =>
+      _db.select(_db.classSchedules).watch();
+
+  Future<List<ClassScheduleRow>> getAllSchedules() =>
+      _db.select(_db.classSchedules).get();
+
   // ------------------------------ cache metadata ----------------------------
 
   /// `last_fetched` (UTC millis) of the oldest cached course, or null when
@@ -53,6 +59,11 @@ class NexaLocalDataSource {
         .getSingleOrNull();
     return row?.lastFetched;
   }
+
+  /// Feedback rows currently in the cache, used to detect newly added notes.
+  Future<List<FeedbackRow>> getAllFeedback() => _db.select(_db.feedbackNotes).get();
+
+  Future<List<CourseRow>> getAllCourses() => _db.select(_db.courses).get();
 
   // --------------------------------- writes ---------------------------------
 
@@ -84,6 +95,7 @@ class NexaLocalDataSource {
       await _db.delete(_db.assessments).go();
       await _db.delete(_db.attendanceLogs).go();
       await _db.delete(_db.feedbackNotes).go();
+      await _db.delete(_db.classSchedules).go();
 
       final ids = courses.map((b) => b.course.id).toList();
       if (ids.isEmpty) {
@@ -149,6 +161,20 @@ class NexaLocalDataSource {
                 position: i,
               ),
         ]);
+
+        batch.insertAll(_db.classSchedules, [
+          for (final b in courses)
+            for (final s in b.schedules)
+              ClassSchedulesCompanion.insert(
+                id: Value(s.id),
+                courseId: b.course.id,
+                courseName: b.course.name,
+                room: s.room,
+                dayOfWeek: s.dayOfWeek,
+                startMinutes: s.startMinutes,
+                endMinutes: s.endMinutes,
+              ),
+        ]);
       });
     });
   }
@@ -159,6 +185,7 @@ class NexaLocalDataSource {
       await _db.delete(_db.assessments).go();
       await _db.delete(_db.attendanceLogs).go();
       await _db.delete(_db.feedbackNotes).go();
+      await _db.delete(_db.classSchedules).go();
       await _db.delete(_db.courses).go();
       await _db.delete(_db.students).go();
     });

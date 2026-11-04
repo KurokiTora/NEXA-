@@ -85,8 +85,38 @@ class FeedbackNotes extends Table {
   IntColumn get position => integer()();
 }
 
+/// Weekly class sessions (jadwal kelas) used to schedule reminders.
+@DataClassName('ClassScheduleRow')
+class ClassSchedules extends Table {
+  /// Server id, or a deterministic fallback from the course + position.
+  IntColumn get id => integer()();
+  IntColumn get courseId =>
+      integer().references(Courses, #id, onDelete: KeyAction.cascade)();
+
+  /// Denormalised so notification scheduling doesn't need a join.
+  TextColumn get courseName => text()();
+  TextColumn get room => text()();
+
+  /// DateTime.monday (1) .. DateTime.sunday (7).
+  IntColumn get dayOfWeek => integer()();
+
+  /// Minutes since midnight.
+  IntColumn get startMinutes => integer()();
+  IntColumn get endMinutes => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
-  tables: [Students, Courses, Assessments, AttendanceLogs, FeedbackNotes],
+  tables: [
+    Students,
+    Courses,
+    Assessments,
+    AttendanceLogs,
+    FeedbackNotes,
+    ClassSchedules,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Pass an in-memory executor in tests; defaults to the on-device file.
@@ -94,11 +124,15 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'nexa_db'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          // v2 adds the class schedule cache for reminders.
+          if (from < 2) await m.createTable(classSchedules);
+        },
         // Needed for ON DELETE CASCADE to actually work in SQLite.
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

@@ -1,5 +1,6 @@
 import '../../core/errors.dart';
 import '../models/auth_session.dart';
+import '../models/class_schedule.dart';
 import '../models/course.dart';
 import '../models/course_details.dart';
 import '../models/student.dart';
@@ -116,7 +117,26 @@ class MockNexaApi implements NexaApi {
               'next semester.',
         ),
       ],
+      schedules: _schedulesFor(s),
     );
+  }
+
+  /// One weekly session per sample course, so class reminders have data to
+  /// work with even while the real backend is not connected yet.
+  List<ClassSchedule> _schedulesFor(_Seed s) {
+    final day = ((s.id - 1) % 5) + 1; // Monday..Friday
+    final start = 8 * 60 + ((s.id - 1) % 4) * 100;
+    return [
+      ClassSchedule(
+        id: s.id * 10,
+        courseId: s.id,
+        courseName: s.name,
+        room: 'Ruang ${s.id}.01',
+        dayOfWeek: day,
+        startMinutes: start,
+        endMinutes: start + 100,
+      ),
+    ];
   }
 }
 
