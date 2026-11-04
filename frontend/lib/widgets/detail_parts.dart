@@ -220,8 +220,8 @@ class StatusRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: tone.fill.withValues(alpha: 0.4),
         border: Border.all(color: tone.border, width: 1.2),
@@ -238,11 +238,15 @@ class StatusRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Flexible(
+          // Intrinsic width (not Flexible) keeps the status pinned to the
+          // right edge instead of sharing the row 50/50 with the label.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 150),
             child: Text(
               status,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
               style: AppTextStyles.body.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

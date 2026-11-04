@@ -17,7 +17,6 @@ class FeedbackPage extends StatelessWidget {
     return CourseListScreen(
       title: 'Feedback',
       subtitle: 'Track your learning progress and achievement',
-      navIndex: 3,
       courses: courses,
       cardLabel: 'Currently on average',
       cardValue: summary.label,

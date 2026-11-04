@@ -4,7 +4,7 @@ import '../style/text_style.dart';
 import '../widgets/nexa_mark.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
-import 'dashboard.dart';
+import 'main_shell.dart';
 import 'login.dart';
 
 /// Splash screen (~5 s), meant to mirror the reference video:
@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage>
           context,
           MaterialPageRoute(
             builder: (context) =>
-                loggedIn ? const DashboardPage() : const LoginPage(),
+                loggedIn ? const MainShell() : const LoginPage(),
           ),
         );
       }

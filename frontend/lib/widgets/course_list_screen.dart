@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/models/course.dart';
-import '../page/bottom_navidation.dart';
 import '../state/sync_state.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
@@ -18,7 +17,6 @@ class CourseListScreen extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    required this.navIndex,
     required this.courses,
     required this.cardLabel,
     required this.cardValue,
@@ -29,7 +27,6 @@ class CourseListScreen extends StatelessWidget {
 
   final String title;
   final String subtitle;
-  final int navIndex;
   final List<Course> courses;
   final String cardLabel;
   final String cardValue;
@@ -84,7 +81,6 @@ class CourseListScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNav(currentIndex: navIndex),
     );
   }
 

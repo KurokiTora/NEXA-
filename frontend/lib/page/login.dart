@@ -6,7 +6,7 @@ import '../core/errors.dart';
 import '../state/auth_state.dart';
 import '../widgets/states/error_banner.dart';
 import '../widgets/states/status_popup.dart';
-import 'dashboard.dart';
+import 'main_shell.dart';
 import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        MaterialPageRoute(builder: (context) => const MainShell()),
       );
     } on AuthFailure {
       if (mounted) setState(() => _showLoginError = true);

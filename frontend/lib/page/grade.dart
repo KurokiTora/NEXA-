@@ -17,7 +17,6 @@ class GradePage extends StatelessWidget {
     return CourseListScreen(
       title: 'My Grades',
       subtitle: 'Track your learning progress and achievement',
-      navIndex: 1,
       courses: courses,
       cardLabel: 'Currently on average',
       cardValue: summary.hasData ? '${summary.averageGrade}' : '-',

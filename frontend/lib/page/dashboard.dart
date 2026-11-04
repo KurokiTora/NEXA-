@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/errors.dart';
+import '../core/services/nexa_notification_service.dart';
 import '../data/models/course.dart';
 import '../data/models/student.dart';
 import '../state/auth_state.dart';
@@ -13,7 +14,6 @@ import '../widgets/states/empty_state.dart';
 import '../widgets/states/refresh_helper.dart';
 import '../widgets/states/status_popup.dart';
 import 'attend_detail.dart';
-import 'bottom_navidation.dart';
 import 'feedback_detail.dart';
 import 'grade_detail.dart';
 import 'login.dart';
@@ -35,7 +35,14 @@ class _DashboardPageState extends State<DashboardPage> {
   /// Offline-first: the screen already shows whatever is cached. We only go
   /// to the network when the cache is empty or older than the TTL.
   Future<void> _syncIfStale() async {
-    final error = await context.read<SyncState>().refreshIfStale();
+    final notifications = context.read<NexaNotificationService>();
+    final sync = context.read<SyncState>();
+    if (notifications.enabled) {
+      // No-op when the OS permission was already granted/denied.
+      await notifications.requestPermission();
+    }
+
+    final error = await sync.refreshIfStale();
     if (error == null || !mounted) return;
 
     // Failing while offline with cached data on screen is normal -> stay
@@ -47,7 +54,10 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _logout() async {
-    await context.read<AuthState>().logout();
+    final notifications = context.read<NexaNotificationService>();
+    final auth = context.read<AuthState>();
+    await notifications.cancelAll();
+    await auth.logout();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -56,11 +66,34 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  Future<void> _toggleNotifications() async {
+    final service = context.read<NexaNotificationService>();
+    final sync = context.read<SyncState>();
+    final next = !service.enabled;
+    final granted = await service.setEnabled(next);
+
+    if (next && granted) {
+      await sync.syncClassReminders();
+    }
+    if (!mounted) return;
+    setState(() {});
+
+    final message = !next
+        ? 'Notifications turned off.'
+        : granted
+            ? 'Notifications on. Class reminders are scheduled.'
+            : 'Permission denied. Enable notifications in your phone settings.';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final student = context.watch<Student?>();
     final courses = context.watch<List<Course>>();
     final isSyncing = context.select<SyncState, bool>((s) => s.isRefreshing);
+    final notificationsOn = context.read<NexaNotificationService>().enabled;
 
     String sks(int? v) => v == null ? '/-' : '/$v';
     String ip(double? v) => v == null ? '/-' : '/${v.toStringAsFixed(2)}';
@@ -81,10 +114,28 @@ class _DashboardPageState extends State<DashboardPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Image.asset('asset/image/Nexa_Logo.png', width: 120),
-                    const CircleAvatar(
-                      radius: 22,
-                      backgroundColor: AppColor.Average,
-                      child: Icon(Icons.person, size: 28, color: AppColor.Primary),
+                    Row(
+                      children: [
+                        IconButton(
+                          tooltip: notificationsOn
+                              ? 'Notifications on'
+                              : 'Notifications off',
+                          onPressed: _toggleNotifications,
+                          icon: Icon(
+                            notificationsOn
+                                ? Icons.notifications_active_outlined
+                                : Icons.notifications_off_outlined,
+                            color: AppColor.Primary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor: AppColor.Average,
+                          child: Icon(Icons.person,
+                              size: 28, color: AppColor.Primary),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -211,7 +262,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
     );
   }
 

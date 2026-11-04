@@ -19,7 +19,6 @@ class AttendPage extends StatelessWidget {
     return CourseListScreen(
       title: 'My Attendance',
       subtitle: 'Track your class attendance and stay consistent',
-      navIndex: 4,
       courses: courses,
       cardLabel: 'Overall Attendance',
       cardValue: summary.hasData ? '${summary.averageAttendance}%' : '-',

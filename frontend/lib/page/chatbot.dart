@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import '../data/models/course.dart';
 import '../data/models/performance_summary.dart';
 import '../widgets/nexa_mark.dart';
-import 'bottom_navidation.dart';
-import 'feedback.dart';
-import 'grade.dart';
+import 'tab_navigation.dart';
 
 // Chatbot-specific colors (kept here so color_style.dart stays untouched).
 const _botBubble = Color(0xFF9DD9D0);
@@ -163,7 +161,8 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    // Hide the bottom nav while typing so it doesn't ride above the keyboard.
+    // The shell hides the bottom bar while typing; the command panel also
+    // needs a tighter height budget when the keyboard consumes the screen.
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
@@ -186,7 +185,6 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
           ],
         ),
       ),
-      bottomNavigationBar: keyboardOpen ? null : const AppBottomNav(currentIndex: 2),
     );
   }
 
@@ -229,19 +227,13 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
                       'Your Grade',
                       Icons.workspace_premium_outlined,
                       AppColor.Success.withValues(alpha: 0.6),
-                      () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const GradePage()),
-                      ),
+                      () => MainTabScope.select(context, 1),
                     ),
                     _chip(
                       'Your Feedback',
                       Icons.chat_outlined,
                       const Color(0xFFD5E3FF),
-                      () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const FeedbackPage()),
-                      ),
+                      () => MainTabScope.select(context, 3),
                     ),
                   ],
                 ),
