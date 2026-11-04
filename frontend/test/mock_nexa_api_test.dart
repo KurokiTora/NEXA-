@@ -35,6 +35,7 @@ void main() {
       for (final bundle in snapshot.courses) {
         expect(bundle.assessments, isNotEmpty);
         expect(bundle.attendance, isNotEmpty);
+        expect(bundle.schedules, isNotEmpty);
       }
     });
 
