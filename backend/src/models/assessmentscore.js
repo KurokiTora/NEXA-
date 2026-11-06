@@ -47,7 +47,13 @@ const AssessmentScore = sequelize.define(
         timestamps: true,
         createdAt: false,
         updatedAt: 'updatedAt',
-        underscored: true
+        underscored: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['assessment_id', 'enrollment_id']
+            }
+        ]
     }
 );
 

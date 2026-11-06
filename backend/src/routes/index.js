@@ -1,6 +1,8 @@
 import { Router } from 'express';
 
 import authRoutes from './authroutes.js';
+import lecturerRoutes from './lecturerroutes.js';
+import studentRoutes from './studentroutes.js';
 
 const router = Router();
 
@@ -13,7 +15,11 @@ router.get('/health', (req, res) => {
     });
 });
 
-// Authentication
+// Shared authentication
 router.use('/auth', authRoutes);
+
+// Role-specific routes
+router.use('/lecturer', lecturerRoutes);
+router.use('/student', studentRoutes);
 
 export default router;

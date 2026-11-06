@@ -14,7 +14,7 @@ import {
 import {
     calculateFinalScore,
     convertToGradePoint
-} from './gradingService.js';
+} from './gradingservice.js';
 
 import {
     calculateAttendancePercentage
