@@ -1,97 +1,117 @@
 
-import { ArrowLeft, Mail, GraduationCap, CalendarCheck } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-
-const grades = [
-  { subject: "Mathematics", score: 92, progress: 92 },
-  { subject: "Computer Science", score: 85, progress: 85 },
-  { subject: "English", score: 88, progress: 88 },
-  { subject: "Physics", score: 76, progress: 76 },
-  { subject: "Biology", score: 95, progress: 95 },
-];
+import { useNavigate, useParams, Navigate } from "react-router-dom";
+import Card from "../components/card";
 
 export default function StudentDetailPage() {
+  const { classId, studentId } = useParams();
   const navigate = useNavigate();
-  const { studentId } = useParams();
+
+  const students = [
+    {
+      id: "STD001",
+      classId: "CLS001",
+      name: "Ahmad Fauzan",
+      nim: "225150400111001",
+      assignments: [
+        { id: "A1", title: "HTML & CSS Fundamental", status: "Completed", grade: 90 },
+        { id: "A2", title: "JavaScript Project", status: "Completed", grade: 85 },
+        { id: "A3", title: "Final Website Project", status: "Not Completed", grade: null },
+      ],
+    },
+    {
+      id: "STD002",
+      classId: "CLS001",
+      name: "Siti Nurhaliza",
+      nim: "225150400111002",
+      assignments: [
+        { id: "A1", title: "HTML & CSS Fundamental", status: "Completed", grade: 95 },
+        { id: "A2", title: "JavaScript Project", status: "Completed", grade: 92 },
+        { id: "A3", title: "Final Website Project", status: "Completed", grade: 88 },
+      ],
+    },
+    {
+      id: "STD004",
+      classId: "CLS002",
+      name: "Dina Amelia",
+      nim: "225150400111004",
+      assignments: [
+        { id: "A4", title: "Database Design", status: "Completed", grade: 92 },
+        { id: "A5", title: "SQL Query Practice", status: "Completed", grade: 87 },
+      ],
+    },
+  ];
+
+  const student = students.find(
+    (item) => item.id === studentId && item.classId === classId
+  );
+
+  if (!student) {
+    return <Navigate to="/classes" replace />;
+  }
+
+  const completed = student.assignments.filter(
+    (item) => item.status === "Completed"
+  ).length;
+
+  const graded = student.assignments.filter(
+    (item) => item.grade !== null
+  );
+
+  const average = graded.length
+    ? (
+        graded.reduce((total, item) => total + (item.grade ?? 0), 0) /
+        graded.length
+      ).toFixed(1)
+    : "—";
 
   return (
-    <div className="page-container">
-      <button
-        type="button"
-        className="detail-back-button"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft size={16} /> Back
-      </button>
+    <div className="academic-page">
+      <div className="academic-page-header">
+        <div>
+          <button
+            className="academic-back-button"
+            onClick={() => navigate(`/classes/${classId}`)}
+          >
+            ← Back to Students
+          </button>
 
-      <section className="panel student-profile">
-        <div className="student-avatar">AM</div>
-        <div className="student-profile-info">
-          <p className="section-eyebrow">STUDENT PROFILE</p>
-          <h2 className="page-title">Alicia Morgan</h2>
-          <p className="page-description">
-            Student ID: {studentId ?? "ST001"}
-          </p>
-          <div className="student-profile-meta">
-            <span><Mail size={14} /> alicia@example.com</span>
-            <span><GraduationCap size={14} /> Class 10-A</span>
-            <span><CalendarCheck size={14} /> Enrolled 2026</span>
-          </div>
+          <h1>{student.name}</h1>
+          <p>NIM: {student.nim}</p>
         </div>
-        <span className="classes-status classes-status-active">Active</span>
-      </section>
+      </div>
 
-      <section className="detail-stats-grid">
-        <article className="panel detail-stat-card">
-          <GraduationCap size={20} />
-          <p>Average Score</p>
-          <h3>87.2</h3>
-        </article>
-        <article className="panel detail-stat-card">
-          <CalendarCheck size={20} />
-          <p>Attendance Rate</p>
-          <h3>96%</h3>
-        </article>
-        <article className="panel detail-stat-card">
-          <GraduationCap size={20} />
-          <p>Subjects</p>
-          <h3>{grades.length}</h3>
-        </article>
-      </section>
-
-      <section className="panel student-grades-panel">
-        <div className="detail-panel-heading">
-          <div>
-            <h3>Academic Performance</h3>
-            <p>Current scores by subject</p>
-          </div>
+      <div className="academic-summary-grid">
+        <div className="academic-summary-card">
+          <span>Total Assignment</span>
+          <strong>{student.assignments.length}</strong>
         </div>
 
-        <div className="student-grade-list">
-          {grades.map((grade) => (
-            <div className="student-grade-row" key={grade.subject}>
-              <div className="student-grade-label">
-                <strong>{grade.subject}</strong>
-                <span>{grade.score}/100</span>
-              </div>
-              <div className="student-grade-track">
-                <div
-                  className="student-grade-fill"
-                  style={{ width: `${grade.progress}%` }}
-                />
-              </div>
-            </div>
-          ))}
+        <div className="academic-summary-card">
+          <span>Completed</span>
+          <strong>{completed}</strong>
         </div>
-      </section>
 
-      <section className="panel student-notes-panel">
-        <h3>Teacher Notes</h3>
-        <p>
-          This profile currently uses sample information. Add teacher
-          observations and learning recommendations when the backend is connected.
-        </p>
-      </section>
+        <div className="academic-summary-card">
+          <span>Average Grade</span>
+          <strong>{average}</strong>
+        </div>
+      </div>
+
+      <div className="academic-section-heading">
+        <h2>Assignments</h2>
+        <span>{student.assignments.length} Assignments</span>
+      </div>
+
+      <div className="academic-card-list">
+        {student.assignments.map((assignment) => (
+          <Card
+            key={assignment.id}
+            title={assignment.title}
+            status={assignment.status}
+            grade={assignment.grade}
+          />
+        ))}
+      </div>
     </div>
   );
 }

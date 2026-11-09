@@ -100,4 +100,205 @@
       padding: 16px;
 
    }
+   
+/* ACADEMIC PAGES */
+
+.academic-page {
+  width: 100%;
+  padding: 24px;
+}
+
+.academic-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.academic-page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #09275b;
+  margin: 10px 0 6px;
+}
+
+.academic-page-header p {
+  color: #8791a4;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.academic-back-button {
+  background: none;
+  border: none;
+  color: #153c78;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.academic-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.academic-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  padding: 20px 22px;
+  transition: box-shadow 0.2s ease;
+}
+
+.academic-card:hover {
+  box-shadow: 0 4px 14px rgba(9, 39, 91, 0.07);
+}
+
+.academic-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.academic-card-info h3,
+.academic-card-content h3 {
+  color: #24334d;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 7px;
+}
+
+.academic-card-subtitle {
+  color: #8791a4;
+  font-size: 13px;
+  margin: 0;
+}
+
+.academic-card-footer {
+  color: #8791a4;
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+.academic-card-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.academic-card-action button {
+  background: #09275b;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 17px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.academic-card-action button:hover {
+  background: #153c78;
+}
+
+.academic-status {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.academic-status.completed {
+  background: #e7f7ef;
+  color: #239765;
+}
+
+.academic-status.not-completed {
+  background: #fff0ed;
+  color: #cf4141;
+}
+
+.academic-card-grade {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.academic-card-grade span {
+  color: #8791a4;
+  font-size: 11px;
+}
+
+.academic-card-grade strong {
+  color: #09275b;
+  font-size: 22px;
+}
+
+.academic-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.academic-section-heading h2 {
+  color: #24334d;
+  font-size: 18px;
+  margin: 0;
+}
+
+.academic-section-heading span {
+  color: #8791a4;
+  font-size: 12px;
+}
+
+.academic-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.academic-summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.academic-summary-card span {
+  font-size: 13px;
+  color: #8791a4;
+}
+
+.academic-summary-card strong {
+  font-size: 24px;
+  color: #09275b;
+}
+
+@media (max-width: 768px) {
+  .academic-page {
+    padding: 16px;
+  }
+
+  .academic-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .academic-card {
+    padding: 16px;
+  }
+}
+
   
