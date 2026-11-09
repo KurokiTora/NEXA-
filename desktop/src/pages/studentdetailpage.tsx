@@ -1,6 +1,6 @@
 
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import Card from "../components/card";
+import Card from "../component/card";
 
 export default function StudentDetailPage() {
   const { classId, studentId } = useParams();

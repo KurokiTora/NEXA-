@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import Card from "../components/card";
+import Card from "../component/card";
 
 export default function ClassPage() {
   const navigate = useNavigate();

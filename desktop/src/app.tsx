@@ -12,6 +12,7 @@ import StudentDetailPage from "./pages/studentdetailpage";
 import StudentFeedbackPage from "./pages/studentfeedbackpage";
 import AISettingPage from "./pages/aisettingpage";
 import Layout from "./component/layout";
+import ClassPage from "./pages/classpage";
 
 export default function App() {
   return (
@@ -21,12 +22,13 @@ export default function App() {
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/classes" element={<ClassPage />} />
           <Route
             path="/classes/:classId"
             element={<ClassDetailPage />}
           />
           <Route
-            path="/students/:studentId"
+            path="/classes/:classId/students/:studentId"
             element={<StudentDetailPage />}
           />
           <Route
