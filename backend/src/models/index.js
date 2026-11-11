@@ -16,6 +16,8 @@ import AttendanceRecord from './attendancerecord.js';
 import GradingConfiguration from './gradingconfiguration.js';
 import GradingComponent from './gradingcomponent.js';
 import CourseResult from './courseresult.js';
+import AIInteraction from './aiinteraction.js';
+
 
 // A user account may have one student profile.
 User.hasOne(Student, {
@@ -35,6 +37,17 @@ User.hasOne(Lecturer, {
 });
 
 Lecturer.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user'
+});
+
+// User <-> AIInteraction
+User.hasMany(AIInteraction, {
+    foreignKey: 'userId',
+    as: 'aiInteractions'
+});
+
+AIInteraction.belongsTo(User, {
     foreignKey: 'userId',
     as: 'user'
 });
@@ -291,5 +304,6 @@ export {
     AttendanceRecord,
     GradingConfiguration,
     GradingComponent,
-    CourseResult
+    CourseResult,
+    AIInteraction
 };
