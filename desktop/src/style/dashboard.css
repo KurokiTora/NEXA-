@@ -1,0 +1,506 @@
+
+/* =====================================
+   DASHBOARD LAYOUT
+===================================== */
+
+.dashboard-page {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+
+  width: 100%;
+  min-height: 100%;
+  padding: 10px;
+}
+
+/* =====================================
+   LECTURER PROFILE
+===================================== */
+
+.lecturer-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 170px;
+  padding: 22px;
+
+  background: white;
+  border: 1px solid #e1e6ef;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
+}
+
+.lecturer-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 68px;
+  height: 68px;
+
+  margin-bottom: 12px;
+
+  border-radius: 50%;
+  background: #f8d65b;
+  color: #09275b;
+}
+
+.lecturer-profile h3 {
+  margin: 0 0 8px;
+
+  color: #09275b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lecturer-id {
+  padding: 3px 7px;
+
+  background: #dcece9;
+  color: #263b4d;
+
+  font-size: 10px;
+}
+
+/* =====================================
+   RIGHT DASHBOARD CONTENT
+===================================== */
+
+.dashboard-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  min-width: 0;
+}
+
+/* =====================================
+   LECTURER ATTENDANCE
+===================================== */
+
+.lecturer-attendance {
+  width: 100%;
+  padding: 12px;
+
+  background: white;
+  border: 1px solid #dce3ef;
+  border-radius: 10px;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.lecturer-attendance-header {
+  margin-bottom: 12px;
+
+  color: #09275b;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.attendance-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.attendance-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  min-height: 75px;
+  padding: 12px;
+
+  border-radius: 5px;
+}
+
+.attendance-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.attendance-card strong {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.attendance-present {
+  background: #d9f3e5;
+  color: #16834d;
+}
+
+.attendance-absent {
+  background: #fce1e1;
+  color: #c43d3d;
+}
+
+.attendance-permission {
+  background: #fff0c7;
+  color: #a87512;
+}
+
+/* =====================================
+   LECTURER SCHEDULE
+===================================== */
+
+.lecturer-schedule {
+  width: 100%;
+  padding: 9px;
+
+  background: #d0d9ef;
+  border: 1px solid #b5c3df;
+  border-radius: 10px;
+
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.lecturer-schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+  margin-bottom: 5px;
+
+  background: #09275b;
+  color: white;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lecturer-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.lecturer-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  background: white;
+  color: #111;
+  font-size: 12px;
+  text-align: center;
+}
+
+.lecturer-table td {
+  height: 39px;
+  padding: 8px 6px;
+
+  border: 1px solid #8ba2d0;
+  white-space: nowrap;
+}
+
+.lecturer-table td:first-child {
+  width: 25%;
+}
+
+.lecturer-table td:nth-child(2) {
+  width: 20%;
+}
+
+.lecturer-table td:nth-child(3) {
+  width: 27%;
+}
+
+.lecturer-table td:last-child {
+  width: 28%;
+}
+
+
+/* DASHBOARD LAYOUT */
+.dashboard-page {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px;
+  padding: 10px;
+  align-content: start;
+}
+
+/* STATISTICS CONTAINER */
+
+/* STATISTICS CONTAINER */
+.dashboard-summary {
+  grid-column: 1 / -1;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+
+  padding: 9px 14px;
+
+  background: #09275b;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* STATISTICS CARD */
+.summary-card {
+  min-height: 65px;
+  padding: 8px 13px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  border-radius: 7px;
+  color: #09275b;
+}
+
+.summary-card h4 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* CARD COLORS */
+.summary-attendance {
+  background: #b9f5ca;
+}
+
+.summary-student {
+  background: #91dafa;
+}
+
+.summary-grade {
+  background: #fff0b5;
+}
+
+/* STATISTIC VALUE */
+.summary-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.summary-value strong {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+  color: #09275b;
+}
+
+.summary-prefix,
+.summary-suffix {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* STATISTICS CARD */
+.summary-card {
+  min-height: 85px;
+  padding: 12px 16px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  border-radius: 9px;
+  color: #09275b;
+}
+
+.summary-card h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* CARD COLORS */
+.summary-attendance {
+  background: #b9f5ca;
+}
+
+.summary-student {
+  background: #91dafa;
+}
+
+.summary-grade {
+  background: #fff0b5;
+}
+
+/* STATISTIC VALUE */
+.summary-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.summary-value strong {
+  font-size: 36px;
+  line-height: 1;
+  font-weight: 800;
+  color: #09275b;
+}
+
+.summary-prefix,
+.summary-suffix {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* LECTURER PROFILE */
+.lecturer-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 170px;
+  padding: 20px;
+
+  background: white;
+  border: 1px solid #e1e6ef;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+.lecturer-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 68px;
+  height: 68px;
+
+  margin-bottom: 12px;
+
+  border-radius: 50%;
+  background: #f8d65a;
+  color: #09275b;
+}
+
+.lecturer-profile h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #09275b;
+}
+
+.lecturer-id {
+  padding: 4px 8px;
+  background: #e0eeee;
+  font-size: 10px;
+}
+
+/* LECTURER SCHEDULE */
+.lecturer-schedule {
+  min-width: 0;
+  padding: 9px;
+
+  background: #d0daef;
+  border: 1px solid #b7c5df;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.lecturer-schedule-header {
+  padding: 13px;
+  margin-bottom: 5px;
+
+  background: #09275b;
+  color: white;
+
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+
+  border-radius: 8px;
+}
+
+.lecturer-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.lecturer-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 12px;
+}
+
+.lecturer-table td {
+  padding: 12px 8px;
+  border: 1px solid #8ba2ce;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .dashboard-page {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-summary {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .summary-card {
+    min-height: 80px;
+  }
+}
+
+
+/* =====================================
+   TABLET
+===================================== */
+
+@media (max-width: 900px) {
+  .dashboard-page {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .lecturer-profile {
+    min-height: 150px;
+  }
+}
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 12px;
+  }
+
+  .attendance-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .attendance-card {
+    min-height: 60px;
+  }
+
+  .lecturer-table {
+    font-size: 10px;
+  }
+
+  .lecturer-table td {
+    padding: 7px 4px;
+  }
+}

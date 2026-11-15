@@ -18,8 +18,8 @@ const menuItems = [
     Icon: BookOpen,
   },
   {
-    label: "AI Setting",
-    path: "/ai-setting",
+    label: "Chatbot",
+    path: "/chatbot",
     Icon: Settings,
   },
 ];

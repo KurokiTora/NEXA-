@@ -13,6 +13,7 @@ import StudentFeedbackPage from "./pages/studentfeedbackpage";
 import AISettingPage from "./pages/aisettingpage";
 import Layout from "./component/layout";
 import ClassPage from "./pages/classpage";
+import Chatbot from "./pages/chatbot";
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             path="/feedback"
             element={<StudentFeedbackPage />}
           />
+          <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/ai-setting" element={<AISettingPage />} />
         </Route>
 
