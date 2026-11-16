@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'package:provider/provider.dart';
@@ -67,6 +70,13 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
   bool _menuOpen = false;
   bool _panelShown = false;
 
+  // Speech-to-text: the mic turns speech into editable text in the field, it
+  // never sends the message on its own.
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _speechReady = false;
+  bool _isListening = false;
+  String _speechBaseText = '';
+
   // Drives the one-by-one entrance of the command cards (bottom -> top).
   late final AnimationController _menuAnim = AnimationController(
     vsync: this,
@@ -82,6 +92,7 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
 
   @override
   void dispose() {
+    _speech.stop();
     _controller.dispose();
     _scrollController.dispose();
     _menuAnim.dispose();
@@ -113,6 +124,102 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
     _syncPanel();
   }
 
+  // ---------- speech to text ----------
+  // Speech is only transcribed into the input field so the user can review
+  // and edit it before pressing send.
+
+  Future<void> _toggleListening() async {
+    if (_isListening) {
+      await _stopListening();
+      return;
+    }
+    if (!await _ensureSpeechReady()) {
+      _showSpeechMessage('Speech recognition is not available on this device.');
+      return;
+    }
+    if (!mounted) return;
+
+    // Keep whatever the user already typed; the spoken words are appended.
+    _speechBaseText = _controller.text.trim();
+
+    try {
+      await _speech.listen(
+        onResult: _onSpeechResult,
+        listenOptions: stt.SpeechListenOptions(
+          partialResults: true,
+          cancelOnError: true,
+          listenMode: stt.ListenMode.dictation,
+          listenFor: const Duration(minutes: 2),
+          pauseFor: const Duration(seconds: 4),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isListening = false);
+      _showSpeechMessage('Could not start speech recognition.');
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() => _isListening = _speech.isListening);
+  }
+
+  Future<void> _stopListening() async {
+    await _speech.stop();
+    if (!mounted) return;
+    setState(() => _isListening = false);
+  }
+
+  Future<bool> _ensureSpeechReady() async {
+    if (_speechReady) return true;
+    try {
+      _speechReady = await _speech.initialize(
+        onStatus: _onSpeechStatus,
+        onError: _onSpeechError,
+      );
+    } catch (_) {
+      _speechReady = false;
+    }
+    return _speechReady;
+  }
+
+  void _onSpeechStatus(String status) {
+    if (!mounted) return;
+    setState(() => _isListening = status == 'listening');
+  }
+
+  void _onSpeechError(SpeechRecognitionError error) {
+    if (!mounted) return;
+    setState(() => _isListening = false);
+    _showSpeechMessage(
+      error.errorMsg == 'error_permission' || error.errorMsg == 'error_audio_error'
+          ? 'Microphone permission is needed for speech input.'
+          : 'Could not hear that, please try again.',
+    );
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    if (!mounted) return;
+    final spoken = result.recognizedWords.trim();
+    final next = spoken.isEmpty
+        ? _speechBaseText
+        : (_speechBaseText.isEmpty ? spoken : '$_speechBaseText $spoken');
+
+    _controller.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: next.length),
+    );
+    setState(() {});
+    _syncPanel();
+  }
+
+  void _showSpeechMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -127,6 +234,11 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
   void _send(String raw) {
     final text = raw.trim();
     if (text.isEmpty) return;
+
+    if (_isListening) {
+      _speech.stop();
+      _isListening = false;
+    }
 
     setState(() {
       _messages.add(_ChatMessage(text, true));
@@ -477,7 +589,9 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
                   onSubmitted: _send,
                   style: AppTextStyles.body.copyWith(fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Type something here ........',
+                    hintText: _isListening
+                        ? 'Listening...'
+                        : 'Type something here ........',
                     hintStyle: AppTextStyles.body.copyWith(
                       fontSize: 13,
                       color: AppColor.TextBody.withValues(alpha: 0.4),
@@ -488,7 +602,19 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
                 ),
               ),
               IconButton(
+                onPressed: _toggleListening,
+                tooltip: _isListening ? 'Stop voice input' : 'Voice input',
+                visualDensity: VisualDensity.compact,
+                icon: Icon(
+                  _isListening ? Icons.stop_circle_rounded : Icons.mic_none_rounded,
+                  color: _isListening ? Colors.redAccent : _menuTeal,
+                  size: 20,
+                ),
+              ),
+              IconButton(
                 onPressed: () => _send(_controller.text),
+                tooltip: 'Send',
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.send_rounded, color: _menuTeal, size: 20),
               ),
             ],

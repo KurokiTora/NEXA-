@@ -24,6 +24,10 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>$(PRODUCT_COPYRIGHT)</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Nexa uses the microphone to turn your voice into an editable chat message.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Nexa uses speech recognition to transcribe what you say into the chat input.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
