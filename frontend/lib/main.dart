@@ -50,7 +50,9 @@ Future<void> main() async {
       ? MockNexaApi(simulateOffline: AppConfig.mockSimulateOffline)
       : HttpNexaApi(
           baseUrls: AppConfig.baseUrls,
+          preferredBaseUrl: AppConfig.normalizeBaseUrl(settings.serverBaseUrl),
           timeout: AppConfig.requestTimeout,
+          probeTimeout: AppConfig.probeTimeout,
         );
 
   final repository = NexaRepository(

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import '../core/app_config.dart';
 import '../core/storage/secure_token_storage.dart';
 import '../core/storage/settings_storage.dart';
+import '../data/remote/http_nexa_api.dart';
 import '../data/remote/nexa_api.dart';
 import '../data/repositories/nexa_repository.dart';
 
@@ -37,6 +39,29 @@ class AuthState extends ChangeNotifier {
 
   /// Value of the "Remember me" checkbox from the last login.
   bool get rememberMe => _settings.rememberMe;
+
+  /// True when the app talks to a real server, so the login page can offer
+  /// the "Server" address field. Hidden for the mock/offline mode.
+  bool get canConfigureServer => _api is HttpNexaApi;
+
+  /// Server address saved from the login page (null -> built-in defaults).
+  /// Always normalised, so a stored "10.200.179.74" still shows ":3000".
+  String? get serverBaseUrl =>
+      AppConfig.normalizeBaseUrl(_settings.serverBaseUrl);
+
+  /// Persist and immediately use a new backend address, e.g. the PC's LAN IP
+  /// `192.168.1.10:3000`, so a phone on Wi-Fi needs no USB cable.
+  /// Passing null/empty restores the built-in candidates.
+  Future<void> setServerBaseUrl(String? raw) async {
+    final normalized = AppConfig.normalizeBaseUrl(raw);
+    await _settings.setServerBaseUrl(normalized);
+
+    final api = _api;
+    if (api is HttpNexaApi) {
+      api.preferBaseUrl(normalized);
+    }
+    notifyListeners();
+  }
 
   /// Call once at app start, before showing the first screen.
   ///

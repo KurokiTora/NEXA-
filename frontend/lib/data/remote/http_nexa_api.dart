@@ -36,16 +36,25 @@ import 'nexa_api.dart';
 class HttpNexaApi implements NexaApi {
   HttpNexaApi({
     required List<String> baseUrls,
+    String? preferredBaseUrl,
     http.Client? client,
     this.timeout = const Duration(seconds: 15),
+    this.probeTimeout = const Duration(seconds: 5),
   }) : assert(baseUrls.isNotEmpty),
        _baseUrls = List.unmodifiable(baseUrls),
-       _currentBaseUrl = baseUrls.first,
+       _preferredBaseUrl = preferredBaseUrl,
+       _currentBaseUrl = preferredBaseUrl ?? baseUrls.first,
        _client = client ?? http.Client();
 
   final List<String> _baseUrls;
   final Duration timeout;
+
+  /// Per-candidate limit used while more than one candidate is in play.
+  final Duration probeTimeout;
   final http.Client _client;
+
+  /// Server address saved from the login page (null -> platform defaults).
+  String? _preferredBaseUrl;
 
   /// The candidate that answered last. Reusing it avoids probing every URL on
   /// each request once the emulator/phone/host has been identified.
@@ -53,7 +62,16 @@ class HttpNexaApi implements NexaApi {
 
   static const _jsonHeaders = {'Content-Type': 'application/json'};
 
-  Uri _uri(String path) => Uri.parse('$_currentBaseUrl$path');
+  /// Point the client at [baseUrl] without restarting the app, and remember
+  /// it as the first candidate. Pass null to go back to the defaults.
+  void preferBaseUrl(String? baseUrl) {
+    final trimmed = baseUrl?.trim().replaceAll(RegExp(r'/+$'), '');
+    final normalized = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+    _preferredBaseUrl = normalized;
+    _currentBaseUrl = normalized ?? _baseUrls.first;
+  }
+
+  Uri _uri(String baseUrl, String path) => Uri.parse('$baseUrl$path');
 
   Map<String, String> _bearer(String token) => {
     'Authorization': 'Bearer $token',
@@ -66,14 +84,21 @@ class HttpNexaApi implements NexaApi {
     required String password,
   }) async {
     final res = await _send(
-      () => _client.post(
-        _uri('/auth/login'),
+      (base) => _client.post(
+        _uri(base, '/auth/login'),
         headers: _jsonHeaders,
         body: jsonEncode({'nim': nim, 'password': password}),
       ),
     );
     if (res.statusCode == 400 || res.statusCode == 401) {
       throw const AuthFailure();
+    }
+    if (res.statusCode == 404) {
+      // Port 80 is usually Apache/XAMPP, not this API.
+      throw const ServerFailure(
+        'Alamat ini bukan NEXA API. Pastikan port 3000 ikut ditulis, '
+        'contoh: 10.200.179.74:3000',
+      );
     }
     _ensureOk(res);
     return AuthSession.fromJson(_decodeMap(res));
@@ -82,8 +107,8 @@ class HttpNexaApi implements NexaApi {
   @override
   Future<AuthSession> refreshSession(String refreshToken) async {
     final res = await _send(
-      () => _client.post(
-        _uri('/auth/refresh'),
+      (base) => _client.post(
+        _uri(base, '/auth/refresh'),
         headers: _jsonHeaders,
         body: jsonEncode({'refreshToken': refreshToken}),
       ),
@@ -99,11 +124,14 @@ class HttpNexaApi implements NexaApi {
   Future<RemoteSnapshot> fetchSnapshot(String accessToken) async {
     final results = await Future.wait([
       _send(
-        () => _client.get(_uri('/student/me'), headers: _bearer(accessToken)),
+        (base) => _client.get(
+          _uri(base, '/student/me'),
+          headers: _bearer(accessToken),
+        ),
       ),
       _send(
-        () => _client.get(
-          _uri('/student/courses'),
+        (base) => _client.get(
+          _uri(base, '/student/courses'),
           headers: _bearer(accessToken),
         ),
       ),
@@ -124,17 +152,27 @@ class HttpNexaApi implements NexaApi {
 
   // ------------------------------- helpers -------------------------------
 
-  Future<http.Response> _send(Future<http.Response> Function() request) async {
-    final candidates = [
+  Future<http.Response> _send(
+    Future<http.Response> Function(String baseUrl) request,
+  ) async {
+    final candidates = <String>{
+      ?_preferredBaseUrl,
       _currentBaseUrl,
-      ..._baseUrls.where((base) => base != _currentBaseUrl),
-    ];
+      ..._baseUrls,
+    }.toList(growable: false);
+
+    // Trying more than one candidate means at least one of them is wrong;
+    // fail those fast so the user isn't waiting 15s per dead address.
+    final perCandidateTimeout =
+        candidates.length > 1 ? probeTimeout : timeout;
+
     Object? lastError;
 
     for (final base in candidates) {
-      _currentBaseUrl = base;
       try {
-        return await request().timeout(timeout);
+        final res = await request(base).timeout(perCandidateTimeout);
+        _currentBaseUrl = base;
+        return res;
       } on TimeoutException {
         lastError = const NetworkFailure('Request timed out');
       } on SocketException {

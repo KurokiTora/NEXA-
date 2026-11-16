@@ -36,9 +36,8 @@ class AppConfig {
   ///
   /// Other platforms use localhost.
   ///
-  /// A physical phone on a different Wi-Fi network cannot reach the PC's LAN
-  /// IP. Either use the USB reverse command above, or pass the PC's LAN IP
-  /// with --dart-define when both devices share the same Wi-Fi.
+  /// A physical phone on Wi-Fi should use the server address saved from the
+  /// login page ("Server" button), which takes priority over this list.
   static List<String> get baseUrls {
     if (_baseUrlOverride.isNotEmpty) return [_baseUrlOverride];
     if (kIsWeb) return const ['http://localhost:3000'];
@@ -48,6 +47,34 @@ class AppConfig {
     return const ['http://localhost:3000', 'http://127.0.0.1:3000'];
   }
 
+  /// Default backend port. Appended automatically, so a user who only types
+  /// "10.200.179.74" still reaches the API instead of hitting Apache on :80.
+  static const int defaultPort = 3000;
+
+  /// Normalises a server address typed by the user:
+  ///   "192.168.1.10"      -> "http://192.168.1.10:3000"
+  ///   "192.168.1.10:3000" -> "http://192.168.1.10:3000"
+  /// Returns null when [raw] is empty or not a usable http(s) address.
+  static String? normalizeBaseUrl(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) return null;
+
+    final withScheme = value.contains('://') ? value : 'http://$value';
+    final uri = Uri.tryParse(withScheme);
+    if (uri == null || uri.host.isEmpty) return null;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+
+    final port = uri.hasPort ? uri.port : defaultPort;
+    return '${uri.scheme}://${uri.host}:$port';
+  }
+
+  /// Host part shown in the UI, e.g. "10.200.179.74:3000".
+  static String displayHost(String baseUrl) {
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null || uri.host.isEmpty) return baseUrl;
+    return uri.hasPort ? '${uri.host}:${uri.port}' : uri.host;
+  }
+
   /// First/default base URL. Kept for callers that only need one value.
   static String get baseUrl => baseUrls.first;
 
@@ -55,4 +82,8 @@ class AppConfig {
   static const Duration cacheTtl = Duration(minutes: 15);
 
   static const Duration requestTimeout = Duration(seconds: 15);
+
+  /// Short timeout used while probing the fallback candidates, so a wrong
+  /// address fails in seconds instead of 15s per candidate.
+  static const Duration probeTimeout = Duration(seconds: 5);
 }

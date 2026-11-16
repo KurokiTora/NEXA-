@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'package:provider/provider.dart';
+import '../core/app_config.dart';
 import '../core/errors.dart';
 import '../state/auth_state.dart';
 import '../widgets/states/error_banner.dart';
@@ -66,7 +67,9 @@ class _LoginPageState extends State<LoginPage> {
     } on AuthFailure {
       if (mounted) setState(() => _showLoginError = true);
     } on NetworkFailure {
-      if (mounted) showServerBusyDialog(context, onRefresh: _submit);
+      if (mounted) _showNetworkDialog();
+    } on ServerFailure catch (error) {
+      if (mounted) _showServerMismatchDialog(error.message);
     } catch (_) {
       if (mounted) showRefreshPageDialog(context, onRefresh: _submit);
     } finally {
@@ -74,8 +77,79 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Wi-Fi setup: the phone talks straight to the PC LAN address, so the
+  /// backend can be reached without `adb reverse` over a USB cable.
+  Future<void> _openServerDialog() async {
+    final auth = context.read<AuthState>();
+    if (!auth.canConfigureServer) return;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => _ServerAddressDialog(initialHost: auth.serverBaseUrl),
+    );
+    if (!mounted || result == null) return;
+
+    await auth.setServerBaseUrl(result.isEmpty ? null : result);
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void _showNetworkDialog() {
+    final auth = context.read<AuthState>();
+    final target = auth.serverBaseUrl;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatusPopup(
+        title: 'Server tidak terjangkau',
+        message: target == null
+            ? 'Cek alamat server di menu Server, pastikan HP dan laptop '
+                  'tersambung ke Wi-Fi yang sama.'
+            : 'Tidak bisa menghubungi ${AppConfig.displayHost(target)}. '
+                  'Pastikan backend jalan dan HP ada di Wi-Fi yang sama.',
+        primaryLabel: 'Refresh',
+        onPrimary: () {
+          Navigator.pop(ctx);
+          _submit();
+        },
+        secondaryLabel: auth.canConfigureServer ? 'Server' : null,
+        onSecondary: auth.canConfigureServer
+            ? () {
+                Navigator.pop(ctx);
+                _openServerDialog();
+              }
+            : null,
+      ),
+    );
+  }
+
+  void _showServerMismatchDialog(String message) {
+    final auth = context.read<AuthState>();
+    showDialog(
+      context: context,
+      builder: (ctx) => StatusPopup(
+        title: 'Server tidak sesuai',
+        message: message,
+        primaryLabel: 'Server',
+        onPrimary: () {
+          Navigator.pop(ctx);
+          _openServerDialog();
+        },
+        secondaryLabel: auth.canConfigureServer ? 'Refresh' : null,
+        onSecondary: auth.canConfigureServer
+            ? () {
+                Navigator.pop(ctx);
+                _submit();
+              }
+            : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthState>();
+    final savedServer = auth.serverBaseUrl;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -336,6 +410,30 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                         ),
                       ),
+
+                      // Server address (Wi-Fi, no USB cable needed). The
+                      // address is remembered for the next launches.
+                      if (auth.canConfigureServer) ...[
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: _openServerDialog,
+                          icon: const Icon(
+                            Icons.dns_outlined,
+                            size: 14,
+                            color: Colors.black87,
+                          ),
+                          label: Text(
+                            savedServer == null
+                                ? 'Atur alamat server (Wi-Fi)'
+                                : 'Server: ${AppConfig.displayHost(savedServer)}',
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 11,
+                              color: Colors.black87,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -345,6 +443,110 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Dev-only dialog that points the app at the backend running on the PC.
+///
+/// Returns the normalised address when saved, `''` when the user resets to the
+/// built-in candidates, and `null` when cancelled.
+class _ServerAddressDialog extends StatefulWidget {
+  const _ServerAddressDialog({this.initialHost});
+
+  final String? initialHost;
+
+  @override
+  State<_ServerAddressDialog> createState() => _ServerAddressDialogState();
+}
+
+class _ServerAddressDialogState extends State<_ServerAddressDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialHost == null
+        ? ''
+        : AppConfig.displayHost(widget.initialHost!),
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final normalized = AppConfig.normalizeBaseUrl(_controller.text);
+    if (normalized == null) {
+      setState(() => _error = 'Alamat tidak valid. Contoh: 192.168.1.10:3000');
+      return;
+    }
+    Navigator.pop(context, normalized);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColor.Background,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      title: Text(
+        'Server Backend',
+        style: AppTextStyles.subheading.copyWith(
+          fontSize: 16,
+          color: AppColor.TextPrimary,
+        ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Masukkan IP komputer yang menjalankan backend. HP dan laptop '
+            'harus tersambung ke Wi-Fi yang sama, jadi tidak perlu kabel USB.',
+            style: AppTextStyles.body.copyWith(
+              fontSize: 11,
+              color: AppColor.TextBody.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            keyboardType: TextInputType.url,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
+            style: AppTextStyles.body.copyWith(fontSize: 13),
+            decoration: InputDecoration(
+              hintText: '192.168.1.10',
+              helperText: 'Port 3000 otomatis dipakai kalau tidak ditulis.',
+              errorText: _error,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (widget.initialHost != null)
+          TextButton(
+            onPressed: () => Navigator.pop(context, ''),
+            child: const Text('Reset'),
+          ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(
+          onPressed: _save,
+          style: ElevatedButton.styleFrom(backgroundColor: AppColor.Primary),
+          child: const Text('Simpan'),
+        ),
+      ],
     );
   }
 }

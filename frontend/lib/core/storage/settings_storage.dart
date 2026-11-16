@@ -11,6 +11,7 @@ class SettingsStorage {
 
   static const _rememberMeKey = 'remember_me';
   static const _notificationsEnabledKey = 'notifications_enabled';
+  static const _serverBaseUrlKey = 'server_base_url';
 
   static Future<SettingsStorage> create() async =>
       SettingsStorage(await SharedPreferences.getInstance());
@@ -28,6 +29,22 @@ class SettingsStorage {
 
   Future<void> setNotificationsEnabled(bool value) =>
       _prefs.setBool(_notificationsEnabledKey, value);
+
+  /// Dev-only: backend address typed by the user (e.g. "192.168.1.10:3000")
+  /// so a phone on Wi-Fi can reach the PC without a USB cable or a rebuild.
+  /// Null / empty means "use the built-in candidates".
+  String? get serverBaseUrl {
+    final value = _prefs.getString(_serverBaseUrlKey);
+    return (value == null || value.isEmpty) ? null : value;
+  }
+
+  Future<void> setServerBaseUrl(String? value) async {
+    if (value == null || value.isEmpty) {
+      await _prefs.remove(_serverBaseUrlKey);
+    } else {
+      await _prefs.setString(_serverBaseUrlKey, value);
+    }
+  }
 
   Future<void> clear() => _prefs.clear();
 }
