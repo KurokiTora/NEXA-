@@ -14,6 +14,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'nexa-local-dev-secret-change-me';
 const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '12h';
 const REFRESH_TOKEN_TTL = process.env.REFRESH_TOKEN_TTL || '30d';
 
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+const GROQ_TIMEOUT_MS = 30000;
+
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '1mb' }));
 
@@ -116,6 +120,205 @@ const findStudentByUserId = async (userId) => {
         }
     );
     return rows[0] ?? null;
+};
+
+// ---------------------------------------------------------------------------
+// NEXA AI chatbot (Groq)
+// ---------------------------------------------------------------------------
+
+const CHATBOT_SYSTEM_PROMPT = `
+Kamu adalah NEXA AI, asisten akademik resmi di aplikasi NEXA.
+
+IDENTITAS DAN RUANG LINGKUP:
+1. Bantu pengguna hanya untuk topik akademik (nilai, IPK, absensi, mata kuliah, tugas, feedback dosen, performa) dan cara memakai fitur NEXA.
+2. Gunakan data akademik dari backend hanya untuk pengguna yang sedang login.
+3. Jangan mengarang nilai, IPK, absensi, mata kuliah, tugas, atau data akademik lain.
+4. Jangan mengungkapkan data milik pengguna lain dan jangan meminta password/token.
+5. Tolak pertanyaan di luar topik akademik/NEXA dengan sopan dan singkat.
+
+GAYA:
+6. Gunakan bahasa Indonesia yang jelas dan profesional.
+7. Jawab ringkas, maksimal tiga kalimat, dan langsung ke inti.
+8. Jika data tidak tersedia, katakan belum bisa diakses. Jangan menebak.
+
+Perintah yang tersedia di aplikasi:
+- /feedback   : analisis feedback dosen dan tindak lanjutnya
+- /attendance : analisis kehadiran dan saran perbaikan
+- /studyplan  : saran belajar dan target nilai
+- /performance: tren nilai dan mata kuliah yang perlu perhatian
+`;
+
+const CHATBOT_COMMAND_PROMPTS = {
+    '/feedback':
+        'Pengguna memilih perintah /feedback. Berikan analisis feedback dosen dari data akademik, lalu sarankan tindak lanjut yang konkret.',
+    '/attendance':
+        'Pengguna memilih perintah /attendance. Analisis persentase dan rekap kehadiran, lalu berikan saran agar kehadiran tetap aman.',
+    '/studyplan':
+        'Pengguna memilih perintah /studyplan. Berikan rencana belajar singkat dan target nilai yang realistis berdasarkan data akademik.',
+    '/performance':
+        'Pengguna memilih perintah /performance. Analisis tren nilai dan sebutkan mata kuliah yang perlu perhatian beserta alasannya.'
+};
+
+/// Read-only academic context for the signed-in student. Returns null for
+/// accounts without a student profile (e.g. lecturers).
+const buildAcademicContext = async (userId) => {
+    const student = await findStudentByUserId(userId);
+    if (!student) return null;
+
+    const [courseRows, feedbackRows] = await Promise.all([
+        sequelize.query(
+            `SELECT c.course_code, c.course_name, c.credits,
+                    e.status AS enrollment_status,
+                    cr.final_score, cr.grade_point,
+                    COUNT(ar.id) AS total_sessions,
+                    SUM(CASE WHEN ar.status IN ('present', 'late') THEN 1 ELSE 0 END) AS present_count,
+                    SUM(CASE WHEN ar.status = 'excused' THEN 1 ELSE 0 END) AS excused_count,
+                    SUM(CASE WHEN ar.status = 'absent' THEN 1 ELSE 0 END) AS absent_count
+             FROM enrollments e
+             JOIN classes cl ON cl.id = e.class_id
+             JOIN courses c ON c.id = cl.course_id
+             LEFT JOIN (
+                 SELECT enrollment_id, MAX(id) AS id
+                 FROM course_results
+                 GROUP BY enrollment_id
+             ) latest ON latest.enrollment_id = e.id
+             LEFT JOIN course_results cr ON cr.id = latest.id
+             LEFT JOIN attendance_records ar ON ar.enrollment_id = e.id
+             WHERE e.student_id = :studentId
+             GROUP BY e.id, c.course_code, c.course_name, c.credits,
+                      e.status, cr.final_score, cr.grade_point
+             ORDER BY c.course_name
+             LIMIT 30`,
+            {
+                replacements: { studentId: student.id },
+                type: QueryTypes.SELECT
+            }
+        ),
+        sequelize.query(
+            `SELECT c.course_name, a.title, sc.feedback
+             FROM assessment_scores sc
+             JOIN assessments a ON a.id = sc.assessment_id
+             JOIN enrollments e ON e.id = sc.enrollment_id
+             JOIN classes cl ON cl.id = a.class_id
+             JOIN courses c ON c.id = cl.course_id
+             WHERE e.student_id = :studentId
+               AND sc.feedback IS NOT NULL
+               AND TRIM(sc.feedback) <> ''
+             ORDER BY a.id
+             LIMIT 30`,
+            {
+                replacements: { studentId: student.id },
+                type: QueryTypes.SELECT
+            }
+        )
+    ]);
+
+    const courses = courseRows.map((row) => {
+        const total = asNumber(row.total_sessions);
+        const present = asNumber(row.present_count);
+        const excused = asNumber(row.excused_count);
+        const absent = asNumber(row.absent_count);
+        const counted = present + excused;
+        return {
+            code: row.course_code,
+            name: row.course_name,
+            credits: asNumber(row.credits),
+            status: row.enrollment_status,
+            finalScore:
+                row.final_score === null || row.final_score === undefined
+                    ? null
+                    : round2(row.final_score),
+            gradePoint:
+                row.grade_point === null || row.grade_point === undefined
+                    ? null
+                    : round2(row.grade_point),
+            attendance: {
+                totalSessions: total,
+                present,
+                excused,
+                absent,
+                percent: total ? Math.round((counted / total) * 100) : null
+            }
+        };
+    });
+
+    return {
+        student: { nim: student.student_id, name: student.full_name },
+        courses,
+        feedback: feedbackRows.map((row) => ({
+            course: row.course_name,
+            title: row.title,
+            feedback: row.feedback
+        }))
+    };
+};
+
+const generateChatbotReply = async (message, context) => {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        throw new HttpError(
+            503,
+            'GROQ_API_KEY belum diatur di backend/.env. Tambahkan API key Groq lalu restart backend.'
+        );
+    }
+
+    const commandPrompt = CHATBOT_COMMAND_PROMPTS[message.toLowerCase()];
+    const userContent = commandPrompt
+        ? `${commandPrompt}\n\nPesan pengguna: ${message}`
+        : message;
+    const contextContent = context
+        ? `DATA AKADEMIK PENGGUNA (JSON, hanya untuk pengguna ini):\n${JSON.stringify(context)}`
+        : 'DATA AKADEMIK PENGGUNA: tidak tersedia untuk akun ini. Jangan menebak datanya.';
+
+    let response;
+    try {
+        response = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            signal: AbortSignal.timeout(GROQ_TIMEOUT_MS),
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [
+                    { role: 'system', content: CHATBOT_SYSTEM_PROMPT },
+                    { role: 'system', content: contextContent },
+                    { role: 'user', content: userContent }
+                ],
+                max_tokens: 300,
+                temperature: 0.2
+            })
+        });
+    } catch (error) {
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            throw new HttpError(504, 'NEXA AI melewati batas waktu. Coba lagi.');
+        }
+        throw new HttpError(502, 'Tidak dapat terhubung ke layanan NEXA AI.');
+    }
+
+    let result;
+    try {
+        result = await response.json();
+    } catch {
+        throw new HttpError(502, 'Respons NEXA AI tidak valid.');
+    }
+
+    if (!response.ok) {
+        if (response.status === 429) {
+            throw new HttpError(429, 'Layanan NEXA AI sedang mencapai batas permintaan.');
+        }
+        throw new HttpError(
+            502,
+            result.error?.message || 'Permintaan ke layanan NEXA AI gagal.'
+        );
+    }
+
+    const reply = result.choices?.[0]?.message?.content?.trim();
+    if (!reply) {
+        throw new HttpError(502, 'NEXA AI tidak menghasilkan jawaban.');
+    }
+    return reply;
 };
 
 const authRequired = (req, res, next) => {
@@ -456,6 +659,37 @@ app.get(
 );
 
 // ---------------------------------------------------------------------------
+// Chatbot
+// ---------------------------------------------------------------------------
+
+const chatbotMessageHandler = route(async (req, res) => {
+    const raw = req.body?.message;
+    if (typeof raw !== 'string' || !raw.trim()) {
+        throw new HttpError(400, 'message is required');
+    }
+
+    const message = raw.trim();
+    if (message.length > 2000) {
+        throw new HttpError(400, 'message maksimal 2000 karakter');
+    }
+
+    const context = await buildAcademicContext(req.auth.sub);
+    const reply = await generateChatbotReply(message, context);
+
+    // `reply` is what the current mobile app reads. `data.reply` keeps older
+    // clients (the fawwaz-work contract) working too.
+    res.json({
+        success: true,
+        reply,
+        data: { role: 'assistant', reply }
+    });
+});
+
+app.post('/chatbot/message', authRequired, chatbotMessageHandler);
+// Alias for clients built against the fawwaz-work backend.
+app.post('/api/chatbot/message', authRequired, chatbotMessageHandler);
+
+// ---------------------------------------------------------------------------
 // Health + errors
 // ---------------------------------------------------------------------------
 
@@ -475,6 +709,8 @@ app.get('/', (_req, res) => {
             'POST /auth/refresh',
             'GET /student/me',
             'GET /student/courses',
+            'POST /chatbot/message',
+            'POST /api/chatbot/message',
             'GET /health'
         ]
     });
@@ -488,7 +724,14 @@ app.use((error, _req, res, _next) => {
     const status = error.status || 500;
     if (status >= 500) console.error(error);
     res.status(status).json({
-        error: status >= 500 ? 'Internal server error' : error.message
+        // HttpError messages are written for the client; unexpected 5xx
+        // errors must not leak stack traces or SQL details.
+        error:
+            error instanceof HttpError
+                ? error.message
+                : status >= 500
+                  ? 'Internal server error'
+                  : error.message
     });
 });
 

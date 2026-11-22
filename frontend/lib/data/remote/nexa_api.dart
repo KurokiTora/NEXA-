@@ -21,4 +21,12 @@ abstract class NexaApi {
   /// Throws UnauthorizedFailure when the access token is rejected,
   /// NetworkFailure when offline.
   Future<RemoteSnapshot> fetchSnapshot(String accessToken);
+
+  /// Sends one chat message to the NEXA AI backend and returns its reply.
+  /// Throws UnauthorizedFailure when the access token is rejected,
+  /// NetworkFailure when offline, ServerFailure for other backend errors.
+  Future<String> sendChatMessage({
+    required String accessToken,
+    required String message,
+  });
 }

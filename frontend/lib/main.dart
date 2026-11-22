@@ -53,6 +53,7 @@ Future<void> main() async {
           preferredBaseUrl: AppConfig.normalizeBaseUrl(settings.serverBaseUrl),
           timeout: AppConfig.requestTimeout,
           probeTimeout: AppConfig.probeTimeout,
+          chatTimeout: AppConfig.chatTimeout,
         );
 
   final repository = NexaRepository(

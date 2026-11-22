@@ -5,8 +5,10 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'package:provider/provider.dart';
+import '../core/errors.dart';
 import '../data/models/course.dart';
 import '../data/models/performance_summary.dart';
+import '../data/repositories/nexa_repository.dart';
 import '../widgets/nexa_mark.dart';
 import 'tab_navigation.dart';
 
@@ -19,7 +21,8 @@ const _menuTeal = Color(0xFF4A9A8E);
 class _ChatMessage {
   final String text;
   final bool isUser;
-  const _ChatMessage(this.text, this.isUser);
+  final bool isTyping;
+  const _ChatMessage(this.text, this.isUser, {this.isTyping = false});
 }
 
 class _BotCommand {
@@ -69,6 +72,7 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
   final _scrollController = ScrollController();
   bool _menuOpen = false;
   bool _panelShown = false;
+  bool _isSending = false;
 
   // Speech-to-text: the mic turns speech into editable text in the field, it
   // never sends the message on its own.
@@ -231,44 +235,50 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
     });
   }
 
-  void _send(String raw) {
+  Future<void> _send(String raw) async {
     final text = raw.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
     if (_isListening) {
       _speech.stop();
       _isListening = false;
     }
 
+    // Read the repository before the await so we never touch context after
+    // the widget has been disposed.
+    final repository = context.read<NexaRepository>();
+    const typing = _ChatMessage('NEXA sedang mengetik...', false, isTyping: true);
+
     setState(() {
       _messages.add(_ChatMessage(text, true));
+      _messages.add(typing);
+      _isSending = true;
       _menuOpen = false;
       _controller.clear();
     });
     _syncPanel();
     _scrollToBottom();
 
-    // Placeholder reply until the chatbot is connected to the backend.
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-      setState(() => _messages.add(_ChatMessage(_botReply(text), false)));
-      _scrollToBottom();
-    });
-  }
-
-  String _botReply(String input) {
-    switch (input.toLowerCase()) {
-      case '/feedback':
-        return 'Sample reply for /feedback. Once the chatbot is connected, your lecturer feedback analysis and follow-up recommendations will show up here.';
-      case '/attendance':
-        return 'Sample reply for /attendance. Once the chatbot is connected, your attendance analysis and tips will show up here.';
-      case '/studyplan':
-        return 'Sample reply for /studyplan. Once the chatbot is connected, your study suggestions and grade targets will show up here.';
-      case '/performance':
-        return 'Sample reply for /performance. Once the chatbot is connected, your grade trends and courses that need attention will show up here.';
-      default:
-        return 'I don\'t know that one yet. Open MENU to see the available commands.';
+    String reply;
+    try {
+      reply = await repository.sendChatMessage(text);
+    } on UnauthorizedFailure {
+      reply = 'Sesi kamu sudah berakhir. Silakan login ulang untuk memakai NEXA AI.';
+    } on NetworkFailure {
+      reply = 'Tidak ada koneksi ke server NEXA. Periksa jaringan lalu coba lagi.';
+    } on NexaException catch (error) {
+      reply = 'Maaf, ${error.message}. Coba lagi ya.';
+    } catch (_) {
+      reply = 'Maaf, NEXA AI sedang tidak bisa dihubungi. Coba lagi ya.';
     }
+
+    if (!mounted) return;
+    setState(() {
+      _messages.remove(typing);
+      _messages.add(_ChatMessage(reply, false));
+      _isSending = false;
+    });
+    _scrollToBottom();
   }
 
   @override
@@ -417,7 +427,29 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
           ),
         ],
       ),
-      child: Text(m.text, style: AppTextStyles.body.copyWith(fontSize: 11.5)),
+      child: m.isTyping
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColor.Primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  m.text,
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: 11.5,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            )
+          : Text(m.text, style: AppTextStyles.body.copyWith(fontSize: 11.5)),
     );
 
     return Padding(
@@ -612,10 +644,14 @@ class _ChatbotPageState extends State<ChatbotPage> with SingleTickerProviderStat
                 ),
               ),
               IconButton(
-                onPressed: () => _send(_controller.text),
+                onPressed: _isSending ? null : () => _send(_controller.text),
                 tooltip: 'Send',
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.send_rounded, color: _menuTeal, size: 20),
+                icon: Icon(
+                  Icons.send_rounded,
+                  color: _isSending ? _menuTeal.withValues(alpha: 0.4) : _menuTeal,
+                  size: 20,
+                ),
               ),
             ],
           ),

@@ -83,6 +83,10 @@ class AppConfig {
 
   static const Duration requestTimeout = Duration(seconds: 15);
 
+  /// Chatbot requests wait for the backend -> Groq round trip, so they need a
+  /// much longer budget than a normal data request.
+  static const Duration chatTimeout = Duration(seconds: 45);
+
   /// Short timeout used while probing the fallback candidates, so a wrong
   /// address fails in seconds instead of 15s per candidate.
   static const Duration probeTimeout = Duration(seconds: 5);

@@ -150,6 +150,37 @@ class NexaRepository {
     }
   }
 
+  /// Ask the NEXA AI backend for a reply. Reuses the same token-refresh flow
+  /// as [refresh], so an expired access token does not kill the chat.
+  Future<String> sendChatMessage(String message) async {
+    final access = await _tokens.readAccessToken();
+    if (access == null) throw const UnauthorizedFailure();
+
+    try {
+      return await _api.sendChatMessage(
+        accessToken: access,
+        message: message,
+      );
+    } on UnauthorizedFailure {
+      final refreshToken = await _tokens.readRefreshToken();
+      if (refreshToken == null) rethrow;
+
+      try {
+        final session = await _api.refreshSession(refreshToken);
+        await _tokens.saveTokens(
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
+        );
+        return await _api.sendChatMessage(
+          accessToken: session.accessToken,
+          message: message,
+        );
+      } on AuthFailure {
+        throw const UnauthorizedFailure();
+      }
+    }
+  }
+
   /// Wipe cached data (logout / account switch).
   Future<void> clearLocalData() => _local.clearAll();
 }

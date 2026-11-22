@@ -40,6 +40,7 @@ class HttpNexaApi implements NexaApi {
     http.Client? client,
     this.timeout = const Duration(seconds: 15),
     this.probeTimeout = const Duration(seconds: 5),
+    this.chatTimeout = const Duration(seconds: 45),
   }) : assert(baseUrls.isNotEmpty),
        _baseUrls = List.unmodifiable(baseUrls),
        _preferredBaseUrl = preferredBaseUrl,
@@ -51,6 +52,10 @@ class HttpNexaApi implements NexaApi {
 
   /// Per-candidate limit used while more than one candidate is in play.
   final Duration probeTimeout;
+
+  /// Chatbot replies go through the backend -> Groq, so they get a longer
+  /// budget than ordinary data requests.
+  final Duration chatTimeout;
   final http.Client _client;
 
   /// Server address saved from the login page (null -> platform defaults).
@@ -59,6 +64,11 @@ class HttpNexaApi implements NexaApi {
   /// The candidate that answered last. Reusing it avoids probing every URL on
   /// each request once the emulator/phone/host has been identified.
   String _currentBaseUrl;
+
+  /// True once a request has actually been answered by [_currentBaseUrl].
+  /// While false, every candidate is probed; while true we talk only to the
+  /// known-good server (important for slow chatbot replies).
+  bool _baseConfirmed = false;
 
   static const _jsonHeaders = {'Content-Type': 'application/json'};
 
@@ -69,6 +79,7 @@ class HttpNexaApi implements NexaApi {
     final normalized = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
     _preferredBaseUrl = normalized;
     _currentBaseUrl = normalized ?? _baseUrls.first;
+    _baseConfirmed = false;
   }
 
   Uri _uri(String baseUrl, String path) => Uri.parse('$baseUrl$path');
@@ -128,12 +139,14 @@ class HttpNexaApi implements NexaApi {
           _uri(base, '/student/me'),
           headers: _bearer(accessToken),
         ),
+        requestTimeout: timeout,
       ),
       _send(
         (base) => _client.get(
           _uri(base, '/student/courses'),
           headers: _bearer(accessToken),
         ),
+        requestTimeout: timeout,
       ),
     ]);
     final meRes = results[0];
@@ -150,28 +163,80 @@ class HttpNexaApi implements NexaApi {
     );
   }
 
+  @override
+  Future<String> sendChatMessage({
+    required String accessToken,
+    required String message,
+  }) async {
+    final res = await _send(
+      (base) => _client.post(
+        _uri(base, '/chatbot/message'),
+        headers: {..._jsonHeaders, ..._bearer(accessToken)},
+        body: jsonEncode({'message': message}),
+      ),
+      requestTimeout: chatTimeout,
+    );
+
+    if (res.statusCode == 401) throw const UnauthorizedFailure();
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw ServerFailure(_errorMessage(res));
+    }
+
+    final body = _decodeMap(res);
+    final data = body['data'];
+    final reply = data is Map<String, dynamic> ? data['reply'] : body['reply'];
+    if (reply is! String || reply.trim().isEmpty) {
+      throw const ServerFailure('Chatbot returned an empty reply');
+    }
+    return reply.trim();
+  }
+
+  /// Prefer the backend's human-readable error over a bare status code.
+  String _errorMessage(http.Response res) {
+    try {
+      final body = jsonDecode(utf8.decode(res.bodyBytes));
+      if (body is Map<String, dynamic>) {
+        final error = body['error'] ?? body['message'];
+        if (error is String && error.trim().isNotEmpty) return error.trim();
+      }
+    } on Object {
+      // Fall through to the generic message.
+    }
+    return 'Chatbot request failed (${res.statusCode})';
+  }
+
   // ------------------------------- helpers -------------------------------
 
   Future<http.Response> _send(
-    Future<http.Response> Function(String baseUrl) request,
-  ) async {
-    final candidates = <String>{
-      ?_preferredBaseUrl,
-      _currentBaseUrl,
-      ..._baseUrls,
-    }.toList(growable: false);
-
-    // Trying more than one candidate means at least one of them is wrong;
-    // fail those fast so the user isn't waiting 15s per dead address.
-    final perCandidateTimeout =
-        candidates.length > 1 ? probeTimeout : timeout;
+    Future<http.Response> Function(String baseUrl) request, {
+    Duration? requestTimeout,
+  }) async {
+    // Once a server has answered, stick to it. Probing several addresses
+    // gives each one the short probe timeout, which is too aggressive for a
+    // chatbot reply that waits on Groq.
+    final candidates = _baseConfirmed
+        ? <String>[_currentBaseUrl]
+        : <String>{
+            ?_preferredBaseUrl,
+            _currentBaseUrl,
+            ..._baseUrls,
+          }.toList(growable: false);
 
     Object? lastError;
 
-    for (final base in candidates) {
+    for (var i = 0; i < candidates.length; i++) {
+      final base = candidates[i];
+
+      // The first candidate gets the caller's full budget; the fallbacks are
+      // just quick probes so a wrong address fails fast.
+      final perCandidateTimeout = requestTimeout != null
+          ? (i == 0 ? requestTimeout : probeTimeout)
+          : (candidates.length > 1 ? probeTimeout : timeout);
+
       try {
         final res = await request(base).timeout(perCandidateTimeout);
         _currentBaseUrl = base;
+        _baseConfirmed = true;
         return res;
       } on TimeoutException {
         lastError = const NetworkFailure('Request timed out');
@@ -182,6 +247,8 @@ class HttpNexaApi implements NexaApi {
       }
     }
 
+    // The known-good server just failed; probe every candidate next time.
+    _baseConfirmed = false;
     throw lastError ?? const NetworkFailure();
   }
 

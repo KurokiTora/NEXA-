@@ -64,9 +64,27 @@ curl -X POST http://localhost:3000/auth/login \
 | POST | `/auth/refresh` | no |
 | GET | `/student/me` | Bearer token |
 | GET | `/student/courses` | Bearer token |
+| POST | `/chatbot/message` | Bearer token |
 | GET | `/health` | no |
 
 The response shape matches `frontend/lib/data/remote/http_nexa_api.dart`.
+
+### Chatbot (NEXA AI)
+
+`POST /chatbot/message` accepts `{"message": "..."}` and returns
+`{"reply": "..."}`. It forwards the message plus the signed-in student's
+academic data (courses, grades, attendance, feedback) to Groq.
+
+Add a Groq API key to `backend/.env` (copy from `.env.example`), then restart
+the backend:
+
+```
+GROQ_API_KEY=gsk_...
+GROQ_MODEL=openai/gpt-oss-20b
+```
+
+Without a key the endpoint answers `503` with a clear message; the mobile app
+shows that error instead of a dummy reply.
 
 ## 5. Connect the Flutter app
 

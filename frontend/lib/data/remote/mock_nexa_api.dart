@@ -68,6 +68,33 @@ class MockNexaApi implements NexaApi {
     );
   }
 
+  @override
+  Future<String> sendChatMessage({
+    required String accessToken,
+    required String message,
+  }) async {
+    await _network();
+    if (accessToken.isEmpty) throw const UnauthorizedFailure();
+
+    switch (message.trim().toLowerCase()) {
+      case '/feedback':
+        return 'Feedback dosen: pertahankan kualitas tugas dan tindak lanjuti '
+            'catatan dosen pada mata kuliah dengan nilai terendah.';
+      case '/attendance':
+        return 'Kehadiranmu masih aman. Jaga kehadiran di setiap sesi dan '
+            'segera konfirmasi ke dosen jika berhalangan.';
+      case '/studyplan':
+        return 'Susun jadwal belajar 60-90 menit per hari, prioritaskan mata '
+            'kuliah dengan nilai terendah, dan targetkan kenaikan bertahap.';
+      case '/performance':
+        return 'Performa akademikmu cukup baik. Fokuskan perbaikan pada mata '
+            'kuliah dengan nilai paling rendah pada semester ini.';
+      default:
+        return 'Saya NEXA AI. Tanyakan soal nilai, kehadiran, feedback dosen, '
+            'atau rencana belajar, atau pilih salah satu perintah di MENU.';
+    }
+  }
+
   CourseBundle _bundleFor(_Seed s) {
     return CourseBundle(
       course: Course(
