@@ -1,46 +1,62 @@
-
 import { UserRound } from "lucide-react";
 import "../style/dashboard.css";
-
-const lecturer = {
-  name: "Nexa Lecture",
-  nim: "253100000000",
-};
-
-const statistics = [
-  {
-    title: "Attendant",
-    value: "90%",
-    type: "attendance",
-  },
-  {
-    title: "Student",
-    value: "34",
-    suffix: "Person",
-    type: "student",
-  },
-  {
-    title: "Average Grade",
-    value: "80",
-    prefix: "Total",
-    type: "grade",
-  },
-];
-
-const schedule = [
-  { day: "Senin", code: "T3A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Selasa", code: "T2A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Rabu", code: "T4A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Kamis", code: "T5A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Jumat", code: "T6A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Sabtu", code: "T7A", room: "Kelas 403", time: "12.00 - 00.00" },
-  { day: "Minggu", code: "T8A", room: "Kelas 403", time: "12.00 - 00.00" },
-];
+import { getDashboard, getMe } from "../services/lecturerApi";
+import { useApiData } from "../hooks/useApiData";
+import PageState from "../component/PageState";
 
 export default function DashboardPage() {
+  const me = useApiData(getMe);
+  const dashboard = useApiData(getDashboard);
+
+  const loading = me.loading || dashboard.loading;
+  const error = me.error || dashboard.error;
+
+  if (loading || error || !me.data || !dashboard.data) {
+    return (
+      <PageState
+        loading={loading}
+        error={error}
+        className="dashboard-page"
+        onRetry={() => {
+          me.reload();
+          dashboard.reload();
+        }}
+      />
+    );
+  }
+
+  const lecturer = {
+    name: me.data.profile?.fullName ?? me.data.email,
+    nim: me.data.profile?.lecturerId ?? "",
+  };
+
+  const { stats, schedule } = dashboard.data;
+
+  const statistics = [
+    {
+      title: "Attendant",
+      value:
+        stats.attendancePercentage === null
+          ? "—"
+          : `${stats.attendancePercentage}%`,
+      type: "attendance",
+    },
+    {
+      title: "Student",
+      value: String(stats.studentCount),
+      suffix: "Person",
+      type: "student",
+    },
+    {
+      title: "Average Grade",
+      value: stats.averageGrade === null ? "—" : String(stats.averageGrade),
+      prefix: "Total",
+      type: "grade",
+    },
+  ];
+
   return (
     <div className="dashboard-page">
-
       {/* STATISTICS */}
       <section className="dashboard-summary">
         {statistics.map((item) => (
@@ -52,17 +68,13 @@ export default function DashboardPage() {
 
             <div className="summary-value">
               {item.prefix && (
-                <span className="summary-prefix">
-                  {item.prefix}
-                </span>
+                <span className="summary-prefix">{item.prefix}</span>
               )}
 
               <strong>{item.value}</strong>
 
               {item.suffix && (
-                <span className="summary-suffix">
-                  {item.suffix}
-                </span>
+                <span className="summary-suffix">{item.suffix}</span>
               )}
             </div>
           </div>
@@ -77,24 +89,26 @@ export default function DashboardPage() {
 
         <h3>{lecturer.name}</h3>
 
-        <span className="lecturer-id">
-          {lecturer.nim}
-        </span>
+        <span className="lecturer-id">{lecturer.nim}</span>
       </section>
 
       {/* LECTURER SCHEDULE */}
       <section className="lecturer-schedule">
-        <div className="lecturer-schedule-header">
-          Jadwal Pengajar
-        </div>
+        <div className="lecturer-schedule-header">Jadwal Pengajar</div>
 
         <div className="lecturer-table-wrapper">
           <table className="lecturer-table">
             <tbody>
+              {schedule.length === 0 && (
+                <tr>
+                  <td colSpan={4}>Belum ada jadwal.</td>
+                </tr>
+              )}
+
               {schedule.map((item) => (
-                <tr key={item.code}>
+                <tr key={item.id}>
                   <td>{item.day}</td>
-                  <td>{item.code}</td>
+                  <td>{item.classCode}</td>
                   <td>{item.room}</td>
                   <td>{item.time}</td>
                 </tr>
@@ -103,7 +117,6 @@ export default function DashboardPage() {
           </table>
         </div>
       </section>
-
     </div>
   );
 }

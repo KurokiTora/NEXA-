@@ -14,12 +14,14 @@ import AISettingPage from "./pages/aisettingpage";
 import Layout from "./component/layout";
 import ClassPage from "./pages/classpage";
 import Chatbot from "./pages/chatbot";
+import ForgotPasswordPage from "./pages/forgotpasswordpage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
