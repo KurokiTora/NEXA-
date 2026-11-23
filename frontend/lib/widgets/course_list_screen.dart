@@ -10,8 +10,8 @@ import 'states/empty_state.dart';
 import 'states/refresh_helper.dart';
 
 /// Layout shared by the Grade, Attend and Feedback tabs:
-/// title, blue summary card, optional extra block, "By Subject" bar and the
-/// course list (pull down to sync with the backend).
+/// title, blue summary card, optional extra block, "By Subject" heading and
+/// the course list (pull down to sync with the backend).
 class CourseListScreen extends StatelessWidget {
   const CourseListScreen({
     super.key,
@@ -60,7 +60,7 @@ class CourseListScreen extends StatelessWidget {
                 _summaryCard(),
                 if (extra != null) ...[const SizedBox(height: 16), extra!],
                 const SizedBox(height: 16),
-                _bySubjectBar(),
+                _bySubjectHeader(),
                 const SizedBox(height: 8),
                 if (courses.isEmpty)
                   isSyncing
@@ -122,26 +122,32 @@ class CourseListScreen extends StatelessWidget {
     );
   }
 
-  Widget _bySubjectBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColor.Primary,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.menu_book_outlined, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            'By Subject',
-            style: AppTextStyles.subheading
-                .copyWith(color: Colors.white, fontSize: 16),
+  /// Section heading "By Subject" followed by a hairline rule to the right.
+  /// The course rows below keep their own card style.
+  Widget _bySubjectHeader() {
+    return Row(
+      children: [
+        const Icon(
+          Icons.layers_outlined,
+          color: AppColor.Primary,
+          size: 24,
+        ),
+        const SizedBox(width: 10),
+        Text(
+          'By Subject',
+          style: AppTextStyles.subheading.copyWith(
+            color: AppColor.Primary,
+            fontSize: 18,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            height: 1.2,
+            color: AppColor.Border.withValues(alpha: 0.8),
+          ),
+        ),
+      ],
     );
   }
 }
